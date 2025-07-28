@@ -15,6 +15,7 @@ import { setRefresh } from '@/redux/reducer/RefreshReduce';
 import { UserType } from '@/redux/reducer/UserReduce';
 import HomeIcon from '@mui/icons-material/Home';
 import { ModalType, setModal } from '@/redux/reducer/ModalReduce';
+import Link from 'next/link';
 const Sidebar = () => {
 
     const [_currentUser, set_currentUser] = useState<UserType>(store.getState().user)
@@ -98,10 +99,16 @@ const Sidebar = () => {
                     )
                 }
             </div>
-            <div className='flex gap-2 h-8 cursor-pointer hover:opacity-75 border-b border-org-button' onClick={() => console.log("heelo")}>
-                <HomeIcon className='h-7 w-7 my-auto text-org-button' />
-                <p className='h-full flex flex-col justify-center  text-sm'>就職サイト</p>
-            </div>
+            {
+                process.env.home_url ?
+                    <Link href={process.env.home_url} target='_blank'>
+                        <div className='flex gap-2 h-8 cursor-pointer hover:opacity-75 border-b border-org-button'>
+                            <HomeIcon className='h-7 w-7 my-auto text-org-button' />
+                            <p className='h-full flex flex-col justify-center  text-sm'>就職サイト</p>
+                        </div>
+                    </Link> :
+                    null
+            }
             <div className='flex gap-2 h-8 cursor-pointer hover:opacity-75' onClick={() => { set_isLogOut(true); store.dispatch(setModal({ type: "confirm", open: true, value: "", msg: "ログアウトしてもよろしいですか?" })) }}>
                 <LogoutIcon className='h-7 w-7 my-auto text-org-button' />
                 <p className='h-full flex flex-col justify-center  text-sm'>ログアウト</p>
