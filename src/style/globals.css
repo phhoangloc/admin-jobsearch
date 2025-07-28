@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+@theme {
+    --breakpoint-xs: 375px;
+    --xs: 375px;
+    --breakpoint-sm: 575px;
+    --sm: 575px;
+    --breakpoint-md: 768px;
+    --md: 768px;
+    --breakpoint-lg: 992px;
+    --lg: 992px;
+    --breakpoint-xl: 1200px;
+    --xl: 1200px;
+    --breakpoint-xxl: 1600px;
+    --xxl: 1600px;
+    /* widht */
+    --vw-6: calc(100vw - 1.5rem);
+    --vw-8: calc(100vw - 2rem);
+    --vw-12: calc(100vw - 3rem);
+    --vw-40: calc(100% - 10rem);
+    --maxw-40: calc(1600px - 10rem);
+    /* height */
+    --vh-12: calc(100vh - 3rem);
+    --vh-24: calc(100vh - 6rem);
+    --vh-36: calc(100vh - 9rem);
+    --color-org-bg: #FFFDD6;
+    --color-org-button: #E68A01;
+}
+
+.none-scr::-webkit-scrollbar {
+    display: none;
+}
+
+.dangerous_box h1,
+h2,
+h3,
+h4,
+h5 {
+    font-weight: bold;
+}
+
+.dangerous_box h1 {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.dangerous_box h2 {
+    margin-top: 1.25rem;
+    font-size: 1.25rem;
+}
+
+.dangerous_box h3 {
+    margin-top: 1.125rem;
+    font-size: 1.125rem;
+}
+
+.dangerous_box h4 {
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+
+.dangerous_box h5 {
+    margin-top: 0.875rem;
+    font-size: 0.875rem;
+}
+
+.dangerous_box p,
+div {
+    line-height: 1.75;
+}
