@@ -22,7 +22,7 @@ const Page = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [_item, set_item] = useState<any>()
 
-
+    const [_refresh, set_refresh] = useState<number>(0)
     useEffect(() => {
         const getItem = async (position: string, archive: string, slug: string) => {
             if (archive === "user") {
@@ -48,7 +48,7 @@ const Page = () => {
         if (_currentUser) {
             getItem(_currentUser.position, archive, slug)
         }
-    }, [_currentUser, _currentUser.position, archive, slug])
+    }, [_currentUser, _currentUser.position, archive, slug, _refresh])
 
     return (
         <div className='bg-white rounded-lg shadow-md p-2'>
@@ -56,10 +56,10 @@ const Page = () => {
                 {convertArchive(archive)}{slug === "news" ? "登録" : null}
             </div>
             {archive === "user" && _item ? <DetailUser user={_item} /> : null}
-            {archive === "news" && (_item || slug === "news") ? <DetailNews item={_item} event={() => console.log("hello")} archive={archive} /> : null}
-            {archive === "facility" && (_item || slug === "news") ? <DetailFacility item={_item} event={() => console.log("hello")} archive={archive} /> : null}
-            {archive === "post" && (_item || slug === "news") ? <DetailPost item={_item} event={() => console.log("hello")} archive={archive} /> : null}
-            {archive === "interview" && (_item || slug === "news") ? <DetailInterview item={_item} event={() => console.log("hello")} archive={archive} /> : null}
+            {archive === "news" && (_item || slug === "news") ? <DetailNews item={_item} event={() => set_refresh(n => n + 1)} archive={archive} /> : null}
+            {archive === "facility" && (_item || slug === "news") ? <DetailFacility item={_item} event={() => set_refresh(n => n + 1)} archive={archive} /> : null}
+            {archive === "post" && (_item || slug === "news") ? <DetailPost item={_item} event={() => set_refresh(n => n + 1)} archive={archive} /> : null}
+            {archive === "interview" && (_item || slug === "news") ? <DetailInterview item={_item} event={() => set_refresh(n => n + 1)} archive={archive} /> : null}
         </div>
     )
 }

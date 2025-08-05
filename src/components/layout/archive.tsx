@@ -133,7 +133,7 @@ export const Archive = ({ items, event, archive }: Props) => {
                         <div className='h-9 flex justify-between even:bg-slate-100 p-2 cursor-pointer'
                             key={index}>
                             <div onClick={() => !it.slug ? toPage.push("user/" + it.id) : toPage.push(it.archive + "/" + it.slug)} className='w-full'>
-                                {it.name || it.username || it.title}
+                                {it.name || it.username || it.title} <span className='opacity-50 text-sm'>{it.draft ? "（下書き）" : null}</span>
                             </div>
                             <DeleteIcon className='text-org-button' onClick={() => { store.dispatch(setModal({ open: true, type: "confirm", msg: "ニュースを削除してもよろしいでしょうか。", value: "" })); set_id(it.id) }} />
                         </div>

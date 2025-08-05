@@ -301,6 +301,7 @@ type FacilityProps = {
         homepage: string,
         map: string,
         video: string,
+        draft: boolean,
     },
     event: () => void
     archive?: string
@@ -392,7 +393,8 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
         email: _email,
         homepage: _homepage,
         map: _map,
-        video: _video
+        video: _video,
+        draft: false,
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -612,10 +614,15 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <div className=''></div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
+            <div className='pt-4 pl-2'>状態 : <span className='font-bold'>{item?.draft ? "下書き" : "公開"}</span></div>
+            {item ?
+                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _postno && _phone && _address) { body.draft = true; updateItem(body) } }} >・下書き保存</div> :
+                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _postno && _phone && _address) { body.draft = true; createItem(body) } }}>・下書き保存</div>
+            }
             <div className="flex gap-1">
-                <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0' onClick={() => { toPage.back() }} />
+                <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0 !w-20' onClick={() => { toPage.back() }} />
                 {item ?
-                    <Button name="更新" sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> :
+                    <Button name={item.draft ? "公開" : "更新"} sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> :
                     <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_postno || !_phone || !_address} onClick={() => { createItem(body) }} />}
             </div>
 
@@ -627,7 +634,7 @@ type PostProps = {
     item?: {
         id: number,
         archive: string,
-        name: string,
+        title: string,
         slug: string,
         worktype: string,
         tag: string,
@@ -652,6 +659,7 @@ type PostProps = {
         },
         startDate: Date,
         endDate: Date
+        draft: boolean,
     },
     event: () => void
     archive?: string
@@ -689,7 +697,6 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
     const [_startDate, set_startDate] = useState<Date>(new Date())
     const [_endDate, set_endDate] = useState<Date>(new Date())
 
-    // const [_modalImage, set_modalImage] = useState<boolean>(false)
     const [_modalFacility, set_modalFacility] = useState<boolean>(false)
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
@@ -699,7 +706,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
         if (item) {
             set_id(item.id)
             set_archive(item.archive)
-            set_name(item.name)
+            set_name(item.title)
             set_slug(item.slug)
             set_worktype(item.worktype)
             set_worktag(item.tag)
@@ -742,14 +749,15 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
         lisense: _lisense,
         dayoff: _dayoff,
         startDate: new Date(_startDate),
-        endDate: new Date(_endDate)
+        endDate: new Date(_endDate),
+        draft: false
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateItem = async (body: any) => {
         const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id: _id }, body)
         if (result.success) {
-            store.dispatch(setModal({ open: true, value: "", msg: "更新功！", type: "notification" }))
+            store.dispatch(setModal({ open: true, value: "", msg: "更新成功！", type: "notification" }))
             setTimeout(() => {
                 store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
             }, 3000);
@@ -829,6 +837,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
         }
 
     }
+
     return (
         <div>
             <button className='block mx-auto mb-4 w-max bg-org-button text-white px-2 rounded shadow-md cursor-pointer' onClick={() => { toPage.push("/" + archive + "/news") }}>新規求人情報登録</button>
@@ -895,11 +904,11 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>掲載日</div>
-                <Input type='date' onchange={v => set_startDate(v)} value={moment(_startDate).format("YYYY/MM/DD")} sx='!w-full !m-0' />
+                <Input key={moment(_startDate).format("YYYY-MM-DD")} type='date' onchange={v => set_startDate(v)} value={moment(_startDate).format("YYYY-MM-DD")} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
                 <div className=''>掲載終了日</div>
-                <Input type='date' onchange={v => set_endDate(v)} value={moment(_endDate).format("YYYY/MM/DD")} sx='!w-full !m-0' />
+                <Input key={moment(_endDate).format("YYYY-MM-DD")} type='date' onchange={v => set_endDate(v)} value={moment(_endDate).format("YYYY-MM-DD")} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
                 <div className=''>求人URLを変更できます（英数字でご記入ください）</div>
@@ -909,10 +918,15 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <div className=''>自由記入欄 （求人の内容や、施設の紹介をご記入ください）</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
+            <div className='pt-4 pl-2'>状態 : <span className='font-bold'>{item?.draft ? "下書き" : "公開"}</span></div>
+            {item ?
+                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _workplaceId) { body.draft = true; updateItem(body) } }} >・下書き保存</div> :
+                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _workplaceId) { body.draft = true; createItem(body) } }}>・下書き保存</div>
+            }
             <div className="flex gap-1">
-                <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0' onClick={() => { toPage.back() }} />
+                <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
                 {item ?
-                    <Button name="更新" sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> :
+                    <Button name={item.draft ? "公開" : "更新"} sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> :
                     <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
             </div>
 
@@ -938,6 +952,7 @@ type InterviewProps = {
             name: string
         },
         video: string
+        draft: boolean
     },
     event: () => void
     archive?: string
@@ -968,7 +983,6 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
 
-
     useEffect(() => {
         if (item) {
             set_id(item.id)
@@ -996,28 +1010,47 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
         imageId: _imageId || 4,
         facilityId: _workplaceId,
         video: _video,
-        contenttitle: _contenttitle
+        contenttitle: _contenttitle,
+        draft: false
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateItem = async (body: any) => {
         const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id: _id }, body)
         if (result.success) {
+            store.dispatch(setModal({ open: true, value: "", msg: "更新成功！", type: "notification" }))
+            setTimeout(() => {
+                store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+            }, 3000);
             if (event) {
                 event()
             }
         } else {
             console.log(result.data)
+            store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
+
+            setTimeout(() => {
+                store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+            }, 3000);
         }
     }
     const createItem = async (body: unknown) => {
         const result = await ApiCreateItem({ position: _currentUser.position, archive: archive }, body)
         if (result.success) {
+            store.dispatch(setModal({ open: true, value: "", msg: "作成成功！", type: "notification" }))
+            setTimeout(() => {
+                store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+            }, 3000);
             if (event) {
                 event()
             }
         } else {
             console.log(result.data)
+            store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
+
+            setTimeout(() => {
+                store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+            }, 3000);
         }
     }
 
@@ -1086,10 +1119,15 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 <div className=''>自由記入欄 （求人の内容や、インタビューの紹介をご記入ください）</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
+            <div className='pt-4 pl-2'>状態 : <span className='font-bold'>{item?.draft ? "下書き" : "公開"}</span></div>
+            {item ?
+                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _workplaceId) { body.draft = true; updateItem(body) } }} >・下書き保存</div> :
+                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _workplaceId) { body.draft = true; createItem(body) } }}>・下書き保存</div>
+            }
             <div className="flex gap-1">
                 <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0' onClick={() => { toPage.back() }} />
                 {item ?
-                    <Button name="更新" sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> :
+                    <Button name={item.draft ? "公開" : "更新"} sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { updateItem(body) }} /> :
                     <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
             </div>
 
