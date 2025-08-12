@@ -38,7 +38,7 @@ const Layout = ({ children }: Props) => {
                         </div>
                         <div className='h-24 flex flex-col justify-end'>
                             システムに関するお問い合わせ<br></br>
-                            株式会社アステム t-umeda@astem-co.co.jp<br></br>
+                            全国手話研修センター　syuwakentei@com-sagano.com<br></br>
                             料金・オシラ杯に関する音愛わせ　全国手話研修センター
                         </div>
                     </div>
