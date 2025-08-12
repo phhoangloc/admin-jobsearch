@@ -36,9 +36,15 @@ const Layout = ({ children }: Props) => {
                         <div className='h-(--vh-36) overflow-auto none-scr p-2'>
                             {children}
                         </div>
-                        <div className='h-24 flex flex-col justify-end'>
-                            料金・登録に関するお問い合わせ：<br></br>
-                            全国手話研修センター　syuwakentei@com-sagano.com
+                        <div className='h-24 flex flex-col justify-between text-sm'>
+                            <p>
+                                システムに関するお問い合わせ：<br></br>
+                                株式会社アステム t-umeda@astem-co.co.jp
+                            </p>
+                            <p>
+                                料金・登録に関するお問い合わせ：<br></br>
+                                全国手話研修センター　syuwakentei@com-sagano.com
+                            </p>
                         </div>
                     </div>
 
