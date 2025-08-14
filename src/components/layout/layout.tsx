@@ -22,32 +22,35 @@ const Layout = ({ children }: Props) => {
     }, [])
     return (
         <div className='w-full max-w-(--xl) m-auto overflow-hidden'>
-            <div className="w-full flex">
+            <div className="w-full flex h-(--vh-24)">
                 <div className={`w-0 overflow-hidden transition-all duration-500  ${_currentMenu ? "w-40" : "w-0 md:w-6 lg:w-40"}`}>
                     <Sidebar />
                 </div>
-                <div className={`w-screen md:w-(--vw-6) lg:w-(--vw-40) transition-all duration-500 min-h-screen px-2`}>
+                <div className={`w-screen md:w-(--vw-6) lg:w-(--vw-40) transition-all duration-500 h-full px-2`}>
                     <div className='h-8 flex flex-col justify-center'>
                         {_currentMenu ?
                             <MenuOpenIcon className='h-7 w-7  lg:!hidden cursor-pointer text-org-button' onClick={() => { store.dispatch(setMenu(false)) }} /> :
                             <MenuIcon className='h-7 w-7  lg:!hidden cursor-pointer text-org-button' onClick={() => { store.dispatch(setMenu(true)) }} />}
                     </div>
-                    <div className='h-(--vh-12)'>
-                        <div className='h-(--vh-36) overflow-auto none-scr p-2'>
+                    <div className='h-(--full-12)'>
+                        <div className='h-full overflow-auto none-scr p-2'>
                             {children}
-                        </div>
-                        <div className='h-24 flex flex-col justify-between text-sm'>
-                            <p>
-                                システムに関するお問い合わせ：<br></br>
-                                株式会社アステム t-umeda@astem-co.co.jp
-                            </p>
-                            <p>
-                                料金・登録に関するお問い合わせ：<br></br>
-                                全国手話研修センター　syuwakentei@com-sagano.com
-                            </p>
                         </div>
                     </div>
 
+                </div>
+
+            </div>
+            <div className="fixed w-screen bottom-0 left-0 bg-white">
+                <div className='w-full max-w-(--xl) m-auto flex flex-col justify-end text-sm p-2'>
+                    <p>
+                        システムに関する問い合わせ：<br className='block lg:hidden'></br>
+                        株式会社アステム inquery@astem-co.co.jp
+                    </p>
+                    <p>
+                        料金・登録に関するお問い合わせ：<br className='block lg:hidden'></br>
+                        全国手話研修センター　syuwakentei@com-sagano.com
+                    </p>
                 </div>
             </div>
         </div>

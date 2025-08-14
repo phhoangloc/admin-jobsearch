@@ -7,7 +7,6 @@ import { ApiCreateItem, ApiUpdateItem, ApiUploadFile } from '@/api/user'
 import store from '@/redux/store'
 import { setRefresh } from '@/redux/reducer/RefreshReduce'
 import TextArea from '../input/textarea'
-import { DividerSelect } from '../input/divider'
 import { ApiItem, getAddress } from '@/api/client'
 import { japanRegions } from '@/lib/area'
 import ImageIcon from '@mui/icons-material/Image';
@@ -38,12 +37,15 @@ export const DetailUser = ({ user }: Props) => {
     const [_email, set_email] = useState<string>("")
     const [_password, set_password] = useState<string>("")
     const [_facilityLimit, set_facilityLimit] = useState<number>(0)
+    const [_edit_facility, set_edit_facility] = useState<number[]>([])
+
     const body = {
         username: _username || user.username,
         email: _email || user.email,
         password: _password || undefined,
         facilitieslimit: Number(_facilityLimit) || user.facilitieslimit,
-        active: true
+        active: true,
+        edit_facility: _edit_facility,
     }
     const updateUser = async (body: {
         password?: string;
@@ -93,8 +95,10 @@ export const DetailUser = ({ user }: Props) => {
 
     useEffect(() => {
         set_facilityLimit(user.facilitieslimit)
+        set_edit_facility(user.editfacilities.map(f => f.facilityId))
     }, [user])
 
+    const [_modalFacility, set_modalFacility] = useState<boolean>(false)
 
     return (
         slug === "news" ?
@@ -115,6 +119,8 @@ export const DetailUser = ({ user }: Props) => {
             </div>
             :
             <div>
+                <FacilityModal open={_modalFacility} share={(facility) => { set_edit_facility(crr => crr.includes(facility.id) ? crr.filter(cr => cr !== facility.id) : [...crr, facility.id]) }} currents={_edit_facility} />
+
                 <div className='flex gap-2 mb-2'>
                     <div className='h-9 flex flex-col justify-center w-28'>ユーザー</div>
                     <div className='flex flex-col justify-center w-72 border border-slate-200 px-2'>{user.username}</div>
@@ -129,10 +135,8 @@ export const DetailUser = ({ user }: Props) => {
                     <Input type='password' onchange={v => set_password(v)} value={_password} sx='!w-72 !m-0' />
                 </div>
                 {_currentUser.position === "admin" ?
-                    <div className='flex gap-2 mb-2'>
-                        <div className='h-9 flex flex-col justify-center w-44'>施設制限数</div>
-                        <Input key={_facilityLimit} type='number' onchange={v => set_facilityLimit(v)} value={_facilityLimit?.toString()} sx='!w-72 !m-0' />
-                    </div> :
+                    <ApartmentIcon className='!w-12 !h-12 p-2 cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)} />
+                    :
                     null}
                 <Button name="SAVE" sx='!bg-org-button' disable={!_password && !_facilityLimit} onClick={() => { updateUser(body) }} />
             </div>
@@ -169,7 +173,6 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
     const [_content, set_content] = useState<string>("")
     const [_newContent, set_newContent] = useState<string>("")
     const [_categoryId, set_categoryId] = useState<number>(0)
-    const [_categoryName, set_categoryName] = useState<string>("")
 
     useEffect(() => {
         if (item) {
@@ -179,7 +182,6 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
             set_slug(item.slug)
             set_content(item.content)
             set_categoryId(item.categoryId)
-            set_categoryName(item.category.name)
         } else {
             set_slug("new_" + moment(new Date).format("YYYY_MM_DD_hh_mm_ss"))
         }
@@ -189,7 +191,7 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
         name: _name,
         slug: _slug,
         content: _newContent || _content,
-        categoryId: _categoryId,
+        categoryId: _categoryId || 11,
 
     }
 
@@ -234,21 +236,6 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
         }
     }
 
-    const [_category, set_category] = useState<{ id: number, name: string, }[]>([])
-
-    const getCategory = async () => {
-        const result = await ApiItem({ archive: "category" })
-        console.log(result)
-        if (result.success) {
-            set_category(result.data)
-        } else {
-            set_category([])
-        }
-    }
-    useEffect(() => {
-        getCategory()
-    }, [])
-
     const toPage = useRouter()
 
     return (
@@ -259,17 +246,10 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className='font-bold text-sm'>カテゴリー</div>
-                <DividerSelect name={_categoryName} data={[{ name: "---", id: 0 }, ..._category]} valueReturn={(pair) => set_categoryId(pair.id)} sx='border border-slate-300 ' />
-            </div>
-            <div className='mb-2'>
                 <div className='font-bold text-sm'>コンテンツ</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
-            <div className='mb-2'>
-                <div className='text-sm'>施設URLを変更できます（英数字でご記入ください）</div>
-                <Input onchange={v => set_slug(v)} value={_slug} sx='!w-full !m-0' />
-            </div>
+
             <div className="flex gap-1">
                 <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0' onClick={() => { toPage.back() }} />
                 {item ? <Button name="更新" sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> : <Button name="作成" sx='!bg-org-button !m-0' onClick={() => { createItem(body) }} />}
@@ -607,10 +587,6 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <Input onchange={v => set_video(v)} value={_video} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>施設URLを変更できます（英数字でご記入ください）</div>
-                <Input onchange={v => set_slug(v)} value={_slug} sx='!w-full !m-0' />
-            </div>
-            <div className='mb-2'>
                 <div className=''></div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
@@ -637,7 +613,13 @@ type PostProps = {
         title: string,
         slug: string,
         worktype: string,
-        tag: string,
+        tag: {
+            postId: number,
+            tag: {
+                id: number,
+                name: string
+            }
+        }[],
         workstatus: string,
         worktime: string,
         worksalary: string,
@@ -684,7 +666,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
     const [_contractName, set_contractName] = useState<string>("")
     const [_newContent, set_newContent] = useState<string>("")
     const [_worktype, set_worktype] = useState<string>("")
-    const [_worktag, set_worktag] = useState<string>("")
+    const [_worktag, set_worktag] = useState<{ id: number, name: string }[]>([])
     const [_workstatus, set_workstatus] = useState<string>("")
     const [_workplaceName, set_workplaceName] = useState<string>("")
     const [_workplaceId, set_workplaceId] = useState<number>(0)
@@ -709,7 +691,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             set_name(item.title)
             set_slug(item.slug)
             set_worktype(item.worktype)
-            set_worktag(item.tag)
+            set_worktag(item.tag.map(t => t.tag))
             set_workstatus(item.workstatus)
             set_content(item.content)
             set_contract(item.contract)
@@ -738,7 +720,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
         contract: _contract,
         contractName: _contractName,
         worktype: _worktype,
-        tag: _worktag,
+        tagIds: _worktag.map(t => t.id),
         workstatus: _workstatus,
         worktime: _worktime,
         worksalary: _workSalary,
@@ -838,8 +820,50 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
 
     }
 
+    const [_refresh, set_refresh] = useState<number>(0)
+
+    const [_tag, set_tag] = useState<{ id: number, name: string }[]>([])
+    const getTag = async () => {
+        const result = await ApiItem({ archive: "tag" })
+        if (result.success) {
+            set_tag(result.data)
+        }
+    }
+    useEffect(() => {
+        getTag()
+    }, [_refresh])
+
+    const [_openTagModal, set_openTagModal] = useState<boolean>(false)
+    const [_newTag, set_newTag] = useState<string>("")
+
+    const createTag = async (name: string) => {
+        const result = await ApiCreateItem({ position: _currentUser.position, archive: "tag" }, {
+            name
+        })
+        if (result.success) {
+            set_openTagModal(false)
+            set_refresh(n => n + 1)
+            store.dispatch(setModal({ type: "notification", open: true, msg: "タグの作成成功", value: "" }))
+            setTimeout(() => {
+                store.dispatch(setModal({ type: "", open: false, msg: "", value: "" }))
+            }, 3000);
+        } else {
+            set_openTagModal(false)
+            store.dispatch(setModal({ type: "notification", open: true, msg: "タグの作成失敗", value: "" }))
+            setTimeout(() => {
+                store.dispatch(setModal({ type: "n", open: false, msg: "", value: "" }))
+            }, 3000);
+        }
+    }
     return (
-        <div>
+        <div className='relative'>
+            <div className={`${_openTagModal ? "fixed" : "hidden"} top-0 left-0 w-full h-full backdrop-brightness-90 backdrop-blur-sm z-1 flex flex-col justify-center'`}>
+                <div className="bg-white w-11/12  m-auto flex px-2 gap-2">
+                    <Input onchange={(v) => set_newTag(v)} value={_newTag} key={_openTagModal.toString()}></Input>
+                    <div className='w-28 h-12 m-auto flex flex-col justify-center text-center bg-org-button text-white rounded-2xl cursor-pointer font-bold' onClick={() => createTag(_newTag)}>作成</div>
+                    <div className='w-28 h-12 m-auto flex flex-col justify-center text-center border-2 border-org-button rounded-2xl cursor-pointer text-sm' onClick={() => { set_openTagModal(false); set_newTag("") }}>キャンセル</div>
+                </div>
+            </div>
             <button className='block mx-auto mb-4 w-max bg-org-button text-white px-2 rounded shadow-md cursor-pointer' onClick={() => { toPage.push("/" + archive + "/news") }}>新規求人情報登録</button>
 
             <FacilityModal open={_modalFacility} share={(body) => { set_workplaceName(body.name); set_workplaceId(body.id); set_modalFacility(false) }} current={{ id: _workplaceId }} />
@@ -875,8 +899,14 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <Input onchange={v => set_worktype(v)} value={_worktype} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>タッグ</div>
-                <Input onchange={v => set_worktag(v)} value={_worktag} sx='!w-full !m-0' />
+                <div className=''>タグ</div>
+                <Input onchange={v => set_worktag(v)} value={_worktag.map(t => t.name).toString()} sx='!w-full !m-0' />
+                <div className='flex gap-2 mt-2 flex-wrap'>
+                    {_tag.map((tag, index) =>
+                        <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer ${_worktag.map(t => t.id).includes(tag.id) ? "bg-org-button/25" : "bg-org-button/5"}`} key={index} onClick={() => set_worktag(crr => crr.map(t => t.id).includes(tag.id) ? crr.filter(cr => cr.id !== tag.id) : [...crr, tag])}>{tag.name}</div>
+                    )}
+                    <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer bg-org-button/5 font-bold`} onClick={() => set_openTagModal(true)}>+</div>
+                </div>
             </div>
             <div className='mb-2'>
                 <div className=''>雇用形態</div>
@@ -909,10 +939,6 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             <div className='mb-2'>
                 <div className=''>掲載終了日</div>
                 <Input key={moment(_endDate).format("YYYY-MM-DD")} type='date' onchange={v => set_endDate(v)} value={moment(_endDate).format("YYYY-MM-DD")} sx='!w-full !m-0' />
-            </div>
-            <div className='mb-2'>
-                <div className=''>求人URLを変更できます（英数字でご記入ください）</div>
-                <Input onchange={v => set_slug(v)} value={_slug} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
                 <div className=''>自由記入欄 （求人の内容や、施設の紹介をご記入ください）</div>

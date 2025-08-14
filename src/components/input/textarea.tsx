@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CompositeDecorator, Editor, EditorState, RichUtils } from 'draft-js'
+import { CompositeDecorator, Editor, EditorState } from 'draft-js'
 import { stateToHTML } from 'draft-js-export-html'
 import { stateFromHTML } from 'draft-js-import-html'
 import React, { useEffect, useRef, useState } from 'react'
 // import ImageIcon from '@mui/icons-material/Image';
-import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
-import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import FormatItalicIcon from '@mui/icons-material/FormatItalic';
+// import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
+// import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
+// import FormatBoldIcon from '@mui/icons-material/FormatBold';
+// import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 // import PlaylistAddCircleIcon from '@mui/icons-material/PlaylistAddCircle';
 type Props = {
     value: string,
@@ -83,12 +83,12 @@ const TextArea = ({ value, onchange }: Props) => {
         onchange(_outPut)
     }, [_outPut, onchange])
 
-    const createBlockStyle = (value: EditorState, type: string) => {
-        set_EditorState(RichUtils.toggleBlockType(value, type));
-    }
-    const createInlineStyle = (value: any, type: string) => {
-        set_EditorState(RichUtils.toggleInlineStyle(value, type));
-    }
+    // const createBlockStyle = (value: EditorState, type: string) => {
+    //     set_EditorState(RichUtils.toggleBlockType(value, type));
+    // }
+    // const createInlineStyle = (value: any, type: string) => {
+    //     set_EditorState(RichUtils.toggleInlineStyle(value, type));
+    // }
     // const createImage = async (url: string) => {
     //     const content = _editorState.getCurrentContent();
     //     const contentStateWithEntity = content.createEntity('IMAGE', 'MUTABLE', { src: url });
@@ -103,12 +103,12 @@ const TextArea = ({ value, onchange }: Props) => {
     //     const newEditorState = AtomicBlockUtils.insertAtomicBlock(_editorState, entityKey, ' ');
     //     set_EditorState(newEditorState);
     // }
-    const makeTextRight = async (value: EditorState) => {
-        set_EditorState(RichUtils.toggleBlockType(value, 'text-right'));
-    }
-    const makeTextCenter = async (value: EditorState) => {
-        set_EditorState(RichUtils.toggleBlockType(value, 'text-center'));
-    }
+    // const makeTextRight = async (value: EditorState) => {
+    //     set_EditorState(RichUtils.toggleBlockType(value, 'text-right'));
+    // }
+    // const makeTextCenter = async (value: EditorState) => {
+    //     set_EditorState(RichUtils.toggleBlockType(value, 'text-center'));
+    // }
 
     const editRef: any = useRef("")
 
@@ -122,75 +122,75 @@ const TextArea = ({ value, onchange }: Props) => {
         }
         return '';
     }
-    const getCurrentBlockType = (editorState: EditorState) => {
-        const selection = editorState.getSelection();
-        const content = editorState.getCurrentContent();
-        const block = content.getBlockForKey(selection.getStartKey());
-        return block.getType(); // Trả về kiểu như 'unstyled', 'header-one', 'blockquote', v.v.
-    };
-    const sx = `!h-full !w-full m-auto p-2 font-bold flex flex-col justify-center text-center`
+    // const getCurrentBlockType = (editorState: EditorState) => {
+    //     const selection = editorState.getSelection();
+    //     const content = editorState.getCurrentContent();
+    //     const block = content.getBlockForKey(selection.getStartKey());
+    //     return block.getType(); // Trả về kiểu như 'unstyled', 'header-one', 'blockquote', v.v.
+    // };
+    // const sx = `!h-full !w-full m-auto p-2 font-bold flex flex-col justify-center text-center`
 
-    const tool = [
-        {
-            name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-one" ? "bg-orange-600" : "bg-org-button"}`}>{`h1`}</div>,
-            func: () => createBlockStyle(_editorState, "header-one"),
-            type: "header-one",
-        },
-        {
-            name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-two" ? "bg-orange-600" : "bg-org-button"}`}>{`h2`}</div>,
-            func: () => createBlockStyle(_editorState, "header-two"),
-            type: "header-two",
-        },
-        {
-            name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-three" ? "bg-orange-600" : "bg-org-button"}`}>{`h3`}</div>,
-            func: () => createBlockStyle(_editorState, "header-three"),
-            type: "header-three",
-        },
-        {
-            name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-four" ? "bg-orange-600" : "bg-org-button"}`}>{`h4`}</div>,
-            func: () => createBlockStyle(_editorState, "header-four"),
-            type: "header-four",
-        },
+    // const tool = [
+    //     {
+    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-one" ? "bg-orange-600" : "bg-org-button"}`}>{`h1`}</div>,
+    //         func: () => createBlockStyle(_editorState, "header-one"),
+    //         type: "header-one",
+    //     },
+    //     {
+    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-two" ? "bg-orange-600" : "bg-org-button"}`}>{`h2`}</div>,
+    //         func: () => createBlockStyle(_editorState, "header-two"),
+    //         type: "header-two",
+    //     },
+    //     {
+    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-three" ? "bg-orange-600" : "bg-org-button"}`}>{`h3`}</div>,
+    //         func: () => createBlockStyle(_editorState, "header-three"),
+    //         type: "header-three",
+    //     },
+    //     {
+    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-four" ? "bg-orange-600" : "bg-org-button"}`}>{`h4`}</div>,
+    //         func: () => createBlockStyle(_editorState, "header-four"),
+    //         type: "header-four",
+    //     },
 
-        {
-            name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-five" ? "bg-orange-600" : "bg-org-button"}`}>{`h5`}</div>,
-            func: () => createBlockStyle(_editorState, "header-five"),
-            type: "header-five",
-        },
-        // {
-        //     name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "code-block" ? "bg-orange-600" : "bg-org-button"}`}>{`</>`}</div>,
-        //     func: () => createBlockStyle(_editorState, "code-block"),
-        //     type: "code-block",
-        // },
-        {
-            name: <FormatBoldIcon className={`!h-full !w-full m-auto p-2 text-white ${_editorState.getCurrentInlineStyle().has("BOLD") ? "bg-orange-600" : "bg-org-button"}`} />,
-            func: () => createInlineStyle(_editorState, "BOLD"),
-            type: "BOLD",
-        },
-        {
-            name: <FormatItalicIcon className={`!h-full !w-full m-auto p-2 text-white ${_editorState.getCurrentInlineStyle().has("ITALIC") ? "bg-orange-600" : "bg-org-button"}`} />,
-            func: () => createInlineStyle(_editorState, "ITALIC"),
-            type: "ITALIC",
-        },
-        // {
-        //     name: <ImageIcon className={`${sx} text-white bg-white cursor-pointer`} />,
-        //     func: () => set_isGetPic(true),
-        // },
-        // {
-        //     name: <PlaylistAddCircleIcon className={`${sx} text-white bg-white cursor-pointer`} />,
-        //     func: () => set_isGetAudio(true),
-        // },
-        {
-            name: <FormatAlignCenterIcon className={`${sx} text-white ${getCurrentBlockType(_editorState) === "text-center" ? "bg-orange-600" : "bg-org-button"}`} />,
-            func: () => makeTextCenter(_editorState),
-            type: "text-center",
-        },
-        {
-            name: <FormatAlignRightIcon className={`${sx} text-white ${getCurrentBlockType(_editorState) === "text-right" ? "bg-orange-600" : "bg-org-button"}`} />,
-            func: () => makeTextRight(_editorState),
-            type: "text-right",
-        },
-    ]
+    //     {
+    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-five" ? "bg-orange-600" : "bg-org-button"}`}>{`h5`}</div>,
+    //         func: () => createBlockStyle(_editorState, "header-five"),
+    //         type: "header-five",
+    //     },
+    //     // {
+    //     //     name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "code-block" ? "bg-orange-600" : "bg-org-button"}`}>{`</>`}</div>,
+    //     //     func: () => createBlockStyle(_editorState, "code-block"),
+    //     //     type: "code-block",
+    //     // },
+    //     {
+    //         name: <FormatBoldIcon className={`!h-full !w-full m-auto p-2 text-white ${_editorState.getCurrentInlineStyle().has("BOLD") ? "bg-orange-600" : "bg-org-button"}`} />,
+    //         func: () => createInlineStyle(_editorState, "BOLD"),
+    //         type: "BOLD",
+    //     },
+    //     {
+    //         name: <FormatItalicIcon className={`!h-full !w-full m-auto p-2 text-white ${_editorState.getCurrentInlineStyle().has("ITALIC") ? "bg-orange-600" : "bg-org-button"}`} />,
+    //         func: () => createInlineStyle(_editorState, "ITALIC"),
+    //         type: "ITALIC",
+    //     },
+    //     // {
+    //     //     name: <ImageIcon className={`${sx} text-white bg-white cursor-pointer`} />,
+    //     //     func: () => set_isGetPic(true),
+    //     // },
+    //     // {
+    //     //     name: <PlaylistAddCircleIcon className={`${sx} text-white bg-white cursor-pointer`} />,
+    //     //     func: () => set_isGetAudio(true),
+    //     // },
+    //     {
+    //         name: <FormatAlignCenterIcon className={`${sx} text-white ${getCurrentBlockType(_editorState) === "text-center" ? "bg-orange-600" : "bg-org-button"}`} />,
+    //         func: () => makeTextCenter(_editorState),
+    //         type: "text-center",
+    //     },
+    //     {
+    //         name: <FormatAlignRightIcon className={`${sx} text-white ${getCurrentBlockType(_editorState) === "text-right" ? "bg-orange-600" : "bg-org-button"}`} />,
+    //         func: () => makeTextRight(_editorState),
+    //         type: "text-right",
+    //     },
+    // ]
 
     // const getUrl = (url: string) => {
     //     if (_isGetPic) {
@@ -205,7 +205,7 @@ const TextArea = ({ value, onchange }: Props) => {
     // }
     return (
         <div className=' rounded'>
-            <div className='sticky top-0 py-1 flex gap-1 z-[1] flex-wrap'>
+            {/* <div className='sticky top-0 py-1 flex gap-1 z-[1] flex-wrap'>
                 {
                     tool.map((tl, index) =>
                         <div key={index}
@@ -213,7 +213,7 @@ const TextArea = ({ value, onchange }: Props) => {
                             onClick={tl.func}>{tl.name}</div>
                     )
                 }
-            </div>
+            </div> */}
 
             <div className='dangerous_box border bg-white border-slate-300 min-h-96 p-4 overflow-x-auto scroll_none cursor-text text-justify text-sm md:text-base' onClick={() => editRef.current.focus()}>
                 <Editor ref={editRef} editorState={_editorState} onChange={(editorState) => set_EditorState(editorState)} blockStyleFn={myBlockStyleFn} />

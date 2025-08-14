@@ -39,6 +39,7 @@ const Sidebar = () => {
         icon: <ArticleIcon className='h-7 w-7 my-auto text-org-button' />,
         name: "ニュース",
         link: "/news",
+        limit: "user"
     },
     {
         icon: <ArticleIcon className='h-7 w-7 my-auto text-org-button' />,
@@ -89,7 +90,10 @@ const Sidebar = () => {
     }, [_isLogOut, _currentModal.value, _currentUser.position])
     return (
         <div className='w-max'>
-            <div className='border-b border-org-button'>
+            <div className="h-6"></div>
+            <div className="h-12 flex flex-col justify-center font-bold bg-white text-center shadow-md rounded-md text-org-button">{_currentUser.position === "admin" ? "管理者モード" : ""}</div>
+            <div className="h-6"></div>
+            <div className=''>
                 {
                     menu.map((m, index) =>
                         m.limit === _currentUser.position ? null : <div key={index} className='flex gap-2 h-8 cursor-pointer hover:opacity-75' onClick={() => toPage.push(m.link)}>
@@ -99,16 +103,18 @@ const Sidebar = () => {
                     )
                 }
             </div>
+            <div className="h-8"></div>
             {
                 process.env.home_url ?
                     <Link href={process.env.home_url} target='_blank'>
-                        <div className='flex gap-2 h-8 cursor-pointer hover:opacity-75 border-b border-org-button'>
+                        <div className='flex gap-2 h-8 cursor-pointer hover:opacity-75'>
                             <HomeIcon className='h-7 w-7 my-auto text-org-button' />
                             <p className='h-full flex flex-col justify-center  text-sm'>就職サイト</p>
                         </div>
                     </Link> :
                     null
             }
+            <div className="h-8"></div>
             <div className='flex gap-2 h-8 cursor-pointer hover:opacity-75' onClick={() => { set_isLogOut(true); store.dispatch(setModal({ type: "confirm", open: true, value: "", msg: "ログアウトしてもよろしいですか?" })) }}>
                 <LogoutIcon className='h-7 w-7 my-auto text-org-button' />
                 <p className='h-full flex flex-col justify-center  text-sm'>ログアウト</p>

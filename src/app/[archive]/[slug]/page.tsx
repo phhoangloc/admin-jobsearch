@@ -24,7 +24,7 @@ const Page = () => {
 
     const [_refresh, set_refresh] = useState<number>(0)
     useEffect(() => {
-        const getItem = async (position: string, archive: string, slug: string) => {
+        const getItem = async (position: string, archive: string, slug: string, hostId: string) => {
             if (archive === "user") {
                 if (_currentUser.position === "user") {
                     const result = await ApiItemUser({ position, archive, id: Number(slug) })
@@ -38,7 +38,7 @@ const Page = () => {
                     }
                 }
             } else {
-                const result = await ApiItemUser({ position, archive, slug })
+                const result = await ApiItemUser({ position, archive, hostId, slug })
                 if (result.success) {
                     set_item(result.data[0])
                 }
@@ -46,7 +46,7 @@ const Page = () => {
 
         }
         if (_currentUser) {
-            getItem(_currentUser.position, archive, slug)
+            getItem(_currentUser.position, archive, slug, _currentUser.id.toString())
         }
     }, [_currentUser, _currentUser.position, archive, slug, _refresh])
 

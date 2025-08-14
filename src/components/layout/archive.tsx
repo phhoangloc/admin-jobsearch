@@ -77,11 +77,12 @@ export const ArchiveCategory = ({ items, event }: CategoryProps) => {
 }
 type Props = {
     items: any[]
+    allItemCount?: number
     event: () => void,
     archive?: string,
     share?: ({ id, name }: { id: number, name: string }) => void,
 }
-export const Archive = ({ items, event, archive }: Props) => {
+export const Archive = ({ items, allItemCount, event, archive }: Props) => {
 
     const [_currentUser, set_currentUser] = useState<UserType>(store.getState().user)
     const [_currentModal, set_currentModal] = useState<ModalType>(store.getState().modal)
@@ -121,21 +122,32 @@ export const Archive = ({ items, event, archive }: Props) => {
     }, [_currentUser.position, _id, archive, event, _currentModal])
 
     const toPage = useRouter()
-    return (
-        <div>
-            {archive ? <div className='flex py-2 gap-1'>
-                <button className='block m-0 w-max bg-org-button text-white px-2 rounded shadow-md cursor-pointer' onClick={() => { toPage.push(archive + "/news") }}>新規{convertArchive(archive)}</button>
-            </div> : null}
-            <div className="bg-white shadow rounded">
 
+    return (
+        <div >
+            {archive ?
+                <div className='flex py-2 justify-between pb-4 border-b-2 border-b-org-button/50'>
+                    <div className='block m-0 w-max px-2 rounded cursor-pointer' onClick={() => { toPage.push(archive + "/news") }}>{items.length}{allItemCount ? " / " + allItemCount : " "} 件の{convertArchive(archive)}があります</div>
+                    <div className='block m-0 w-max px-2 rounded cursor-pointer bg-org-button text-white' onClick={() => { toPage.push(archive + "/news") }}>新規{convertArchive(archive)}</div>
+                </div> :
+                null}
+            <div className="h-6"></div>
+            <div className="bg-white shadow rounded ">
+                <div className='h-9'>
+                    <div className='h-full px-2 flex flex-col justify-center font-bold'>タイトル/名前</div>
+                </div>
                 {
                     items.map((it, index) =>
-                        <div className='h-9 flex justify-between even:bg-slate-100 p-2 cursor-pointer'
+                        <div className='grid grid-cols-12 even:bg-slate-100 p-2 cursor-pointer'
                             key={index}>
-                            <div onClick={() => !it.slug ? toPage.push("user/" + it.id) : toPage.push(it.archive + "/" + it.slug)} className='w-full'>
-                                {it.name || it.username || it.title} <span className='opacity-50 text-sm'>{it.draft ? "（下書き）" : null}</span>
+                            <div onClick={() => !it.slug ? toPage.push("user/" + it.id) : toPage.push(it.archive + "/" + it.slug)} className='w-full max-w-96 line-clamp-1 col-span-10'>
+                                {it.name || it.username || it.title}
                             </div>
-                            <DeleteIcon className='text-org-button' onClick={() => { store.dispatch(setModal({ open: true, type: "confirm", msg: "ニュースを削除してもよろしいでしょうか。", value: "" })); set_id(it.id) }} />
+                            <div className='col-span-1 text-center'>{it.draft ? "下書き" : "公開"}</div>
+                            {/* <div className='opacity-50 text-sm w-12'>{it.position ? it.position : null}</div> */}
+                            <div className="col-span-1">
+                                <DeleteIcon className='text-org-button m- !block' onClick={() => { store.dispatch(setModal({ open: true, type: "confirm", msg: "ニュースを削除してもよろしいでしょうか。", value: "" })); set_id(it.id) }} />
+                            </div>
                         </div>
                     )
                 }

@@ -9,6 +9,9 @@ export type UserType = {
     position: string,
     active: boolean,
     facilitieslimit: number
+    editfacilities: {
+        facilityId: number
+    }[]
 }
 const UserReducer = createSlice({
     name: "User",
