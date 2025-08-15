@@ -4,6 +4,7 @@ import { ApiItemUser } from "@/api/user";
 import { UserType } from "@/redux/reducer/UserReduce";
 import store from "@/redux/store";
 import moment from "moment";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 
@@ -80,7 +81,7 @@ export default function Home() {
     }
   }, [_currentUser, _currentUser.position])
 
-  console.log(_interview)
+  const toPage = useRouter()
   return (
     <div className="h-full text-center">
       <div className="font-bold text-2xl">
@@ -102,7 +103,7 @@ export default function Home() {
                 <div className="justify-center text-sm font-bold col-span-2">作成日</div>
               </div>
               {_post.length ? _post.map((p, index) =>
-                <div key={index} className="px-4 grid grid-cols-12 py-2 gap-1">
+                <div key={index} className="px-4 grid grid-cols-12 py-2 gap-1 cursor-pointer" onClick={() => toPage.push("/" + p.archive + "/" + p.slug)}>
                   <div className="justify-center col-span-4">{p.title}</div>
                   <div className="justify-center col-span-4">{p.workplace.name}</div>
                   <div className="justify-center col-span-2">{p.draft ? "下書き" : "公開済み"}</div>
@@ -121,7 +122,7 @@ export default function Home() {
                 <div className="justify-center font-bold text-sm col-span-2">作成日</div>
               </div>
               {_facillities.length ? _facillities.map((f, index) =>
-                <div key={index} className="px-4 grid grid-cols-12 py-2 gap-1">
+                <div key={index} className="px-4 grid grid-cols-12 py-2 gap-1 cursor-pointer" onClick={() => toPage.push("/" + f.archive + "/" + f.slug)}>
                   <div className="justify-center col-span-6">{f.name}</div>
                   <div className="justify-center col-span-2">修正できる</div>
                   <div className="justify-center col-span-2">{f.draft ? "下書き" : "公開済み"}</div>
@@ -140,7 +141,7 @@ export default function Home() {
                 <div className="justify-center text-sm font-bold col-span-2">作成日</div>
               </div>
               {_news.length ? _post.map((p, index) =>
-                <div key={index} className="px-4 grid grid-cols-12 py-2 gap-1">
+                <div key={index} className="px-4 grid grid-cols-12 py-2 gap-1 cursor-pointer" onClick={() => toPage.push("/" + p.archive + "/" + p.slug)}>
                   <div className="justify-center col-span-8">{p.title}</div>
                   <div className="justify-center col-span-2">{p.draft ? "下書き" : "公開済み"}</div>
                   <div className="justify-center col-span-2">{moment(p.createdAt).format("YYYY年MM月DD日")}</div>
@@ -157,7 +158,7 @@ export default function Home() {
                 <div className="justify-center text-sm font-bold col-span-2">作成日</div>
               </div>
               {_interview.length ? _interview.map((p, index) =>
-                <div key={index} className="px-4 grid grid-cols-12 py-2 gap-1">
+                <div key={index} className="px-4 grid grid-cols-12 py-2 gap-1 cursor-pointer" onClick={() => toPage.push("/" + p.archive + "/" + p.slug)}>
                   <div className="justify-center col-span-6">{p.contenttitle}</div>
                   <div className="justify-center col-span-2">{p.name}</div>
                   <div className="justify-center col-span-2">{p.draft ? "下書き" : "公開済み"}</div>

@@ -10,7 +10,6 @@ import { UploadButton } from '../button/button';
 import AddIcon from '@mui/icons-material/Add';
 import Image from 'next/image';
 import { convertArchive } from '@/lib/convert';
-import ShareIcon from '@mui/icons-material/Share';
 import { ModalType, setModal } from '@/redux/reducer/ModalReduce';
 type CategoryProps = {
     items: { id: number, name: string, archive: string }[]
@@ -127,8 +126,8 @@ export const Archive = ({ items, allItemCount, event, archive }: Props) => {
         <div >
             {archive ?
                 <div className='flex py-2 justify-between pb-4 border-b-2 border-b-org-button/50'>
-                    <div className='block m-0 w-max px-2 rounded cursor-pointer' onClick={() => { toPage.push(archive + "/news") }}>{items.length}{allItemCount ? " / " + allItemCount : " "} 件の{convertArchive(archive)}があります</div>
-                    <div className='block m-0 w-max px-2 rounded cursor-pointer bg-org-button text-white' onClick={() => { toPage.push(archive + "/news") }}>新規{convertArchive(archive)}</div>
+                    <div className='block m-0 w-max px-2 rounded'>{items.length}{allItemCount ? " / " + allItemCount : " "} 件の{convertArchive(archive)}があります</div>
+                    {_currentUser.position === "user" && archive === "facility" ? null : <div className='block m-0 w-max px-2 rounded cursor-pointer bg-org-button text-white' onClick={() => { toPage.push(archive + "/news") }}>新規{convertArchive(archive)}</div>}
                 </div> :
                 null}
             <div className="h-6"></div>
@@ -146,7 +145,7 @@ export const Archive = ({ items, allItemCount, event, archive }: Props) => {
                             <div className='col-span-1 text-center'>{it.draft ? "下書き" : "公開"}</div>
                             {/* <div className='opacity-50 text-sm w-12'>{it.position ? it.position : null}</div> */}
                             <div className="col-span-1">
-                                <DeleteIcon className='text-org-button m- !block' onClick={() => { store.dispatch(setModal({ open: true, type: "confirm", msg: "ニュースを削除してもよろしいでしょうか。", value: "" })); set_id(it.id) }} />
+                                {_currentUser.position === "user" ? null : <DeleteIcon className='text-org-button m- !block' onClick={() => { store.dispatch(setModal({ open: true, type: "confirm", msg: "ニュースを削除してもよろしいでしょうか。", value: "" })); set_id(it.id) }} />}
                             </div>
                         </div>
                     )
@@ -156,12 +155,14 @@ export const Archive = ({ items, allItemCount, event, archive }: Props) => {
     )
 }
 
-export const ArchiveFile = ({ items, event, share }: Props) => {
+export const ArchiveFile = ({ items, event }: Props) => {
 
     const [_currentUser, set_currentUser] = useState<UserType>(store.getState().user)
+    const [_currentModal, set_currentModal] = useState<ModalType>(store.getState().modal)
 
     const update = () => {
         store.subscribe(() => set_currentUser(store.getState().user))
+        store.subscribe(() => set_currentModal(store.getState().modal))
     }
 
     useEffect(() => {
@@ -169,6 +170,7 @@ export const ArchiveFile = ({ items, event, share }: Props) => {
     }, [])
 
     const [_select, set_select] = useState<number>(-1)
+    const [_id, set_id] = useState<number>(-1)
 
     const getFile = async (e: any) => {
         const files = e.target.files;
@@ -198,44 +200,57 @@ export const ArchiveFile = ({ items, event, share }: Props) => {
         }
 
     }
-    const deleteImage = async (position: string, archive: string, id: number) => {
-        const result = await ApiDeleteItem({ position, archive, id })
-        if (result.success) {
-            store.dispatch(setModal({ open: true, value: "", msg: "削除成功！", type: "notification" }))
-            setTimeout(() => {
-                set_select(-1)
-                store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
-            }, 3000);
-            if (event) {
+
+
+    useEffect(() => {
+        const deleteImage = async (position: string, archive: string, id: number) => {
+            const result = await ApiDeleteItem({ position, archive, id })
+            if (result.success) {
+                store.dispatch(setModal({ open: true, value: "", msg: "削除成功！", type: "notification" }))
+                setTimeout(() => {
+                    set_select(-1)
+                    store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                }, 3000);
+                if (event) {
+                    event()
+                }
+            } else {
+                console.log(result.data)
+                store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
+
+                setTimeout(() => {
+                    store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                }, 3000);
                 event()
             }
-        } else {
-            console.log(result.data)
-            store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
-
-            setTimeout(() => {
-                store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
-            }, 3000);
-            event()
         }
-    }
-    return (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 p-2 ">
-            <div className=' aspect-square flex flex-col justify-center shadow border border-slate-200 rounded bg-white'>
-                <UploadButton sx='!w-12 !h-12 m-auto' name={<AddIcon className='!h-full !w-full text-sky-600 cursor-pointer' />} onClick={(e) => getFile(e)} />
-            </div>
-            {items.map((item, index) =>
-                <div key={index} className={`relative  aspect-square flex flex-col justify-end  border-slate-200  `}>
-                    <div className={`bg-white cursor-pointer transition-all duration-200 ${index === _select ? "shadow-md -translate-y-8" : "shadow"} absolute top-0 w-full h-full rounded border border-slate-300`} onClick={() => set_select(n => n !== index ? index : -1)}>
-                        <Image src={process.env.ftp_url + item.name} fill className="object-cover" alt={item.name} />
-                    </div>
-                    <div className="flex justify-between">
+        if (_currentModal.value === "yes" && _id !== -1) {
+            deleteImage(_currentUser.position, "file", _id)
+        }
 
-                        <ShareIcon className='!w-6 !h-6 !block hover:text-sky-600' onClick={() => share && share({ id: item.id, name: item.name })} />
-                        <DeleteIcon className='!w-6 !h-6 !block ml-auto mr-0 hover:text-sky-600' onClick={() => deleteImage(_currentUser.position, "file", item.id)} />
-                    </div>
+    }, [_currentModal, _currentUser.position, _id, event])
+    return (
+        <div>
+            <div className='px-2'>{items.length} 枚があります</div>
+            <div className='text-sm opacity-75 px-2'>最大アップロードサイズ 2 mb。</div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 p-2 ">
+                <div className=' aspect-square flex flex-col justify-center shadow border border-slate-200 rounded bg-white'>
+                    <UploadButton sx='!w-12 !h-12 m-auto' name={<AddIcon className='!h-full !w-full text-sky-600 cursor-pointer' />} onClick={(e) => getFile(e)} />
                 </div>
-            )}
+                {items.map((item, index) =>
+                    <div key={index} className={`relative  aspect-square flex flex-col justify-end  overflow-hidden  ${index === _select ? "rounded-md" : ""}`}>
+                        <div className={`bg-white cursor-pointer transition-all duration-200 w-full h-full rounded border border-slate-300`} onClick={() => set_select(n => n !== index ? index : -1)}>
+                            <Image src={process.env.ftp_url + item.name} fill className="object-cover" alt={item.name} />
+                        </div>
+                        <div className={` justify-between absolute w-full h-full top-0 left-0 border-4 border-sky-600 p-1 bg-white/60 rounded-md  ${index === _select ? "flex" : "hidden"} `}>
+                            <div className="flex w-max ml-auto mr-0 cursor-pointer" onClick={() => { store.dispatch(setModal({ type: "confirm", open: true, msg: "本当にこの画像を削除したいか？", value: "" })); set_id(item.id) }}>
+                                <DeleteIcon className='!w-6 !h-6 !block cursor-pointer text-sky-600' />
+                                <div className='text-xs text-sky-600'>削除</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     )
 }

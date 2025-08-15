@@ -5,7 +5,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import { useRouter } from 'next/navigation';
 import ArticleIcon from '@mui/icons-material/Article';
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
-import CategoryIcon from '@mui/icons-material/Category';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -39,23 +38,40 @@ const Sidebar = () => {
         icon: <ArticleIcon className='h-7 w-7 my-auto text-org-button' />,
         name: "ニュース",
         link: "/news",
+        items: [{
+            name: "新規ニュース",
+            link: "/news/news"
+        }],
         limit: "user"
     },
     {
         icon: <ArticleIcon className='h-7 w-7 my-auto text-org-button' />,
         name: "求人情報",
         link: "/post",
+        items: [{
+            name: "新規求人情報",
+            link: "/post/news"
+        }],
     },
 
     {
         icon: <ApartmentIcon className='h-7 w-7 my-auto text-org-button' />,
         name: "施設情報",
-        link: "/facility"
+        link: "/facility",
+        items: [{
+            name: "新規施設登録",
+            link: "/facility/news",
+            limit: "user"
+        }],
     },
     {
         icon: <InterpreterModeIcon className='h-7 w-7 my-auto text-org-button' />,
         name: "インタビュー",
         link: "/interview",
+        items: [{
+            name: "新規インタビュー",
+            link: "/interview/news"
+        }],
         limit: "user"
     },
     {
@@ -68,13 +84,7 @@ const Sidebar = () => {
         icon: <PersonIcon className='h-7 w-7 my-auto text-org-button' />,
         name: "ユーザー",
         link: _currentUser.position === "admin" ? "/user" : "/user/" + _currentUser.id
-    },
-    {
-        icon: <CategoryIcon className='h-7 w-7 my-auto text-org-button' />,
-        name: "カテゴリー",
-        link: "/category",
-        limit: "user"
-    },
+    }
     ]
     const toPage = useRouter()
     useEffect(() => {
@@ -88,6 +98,8 @@ const Sidebar = () => {
             logout()
         }
     }, [_isLogOut, _currentModal.value, _currentUser.position])
+
+    const [_index, set_index] = useState<number>(-1)
     return (
         <div className='w-max'>
             <div className="h-6"></div>
@@ -96,10 +108,22 @@ const Sidebar = () => {
             <div className=''>
                 {
                     menu.map((m, index) =>
-                        m.limit === _currentUser.position ? null : <div key={index} className='flex gap-2 h-8 cursor-pointer hover:opacity-75' onClick={() => toPage.push(m.link)}>
-                            {m.icon}
-                            <p className='h-full flex flex-col justify-center  text-sm'>{m.name}</p>
-                        </div>
+                        m.limit === _currentUser.position ? null :
+                            <div key={index}>
+                                <div className='flex gap-2 h-8 cursor-pointer hover:opacity-75' onClick={() => { toPage.push(m.link); set_index(index) }}>
+                                    {m.icon}
+                                    <p className='h-full flex flex-col justify-center  text-sm'>{m.name}</p>
+                                </div>
+                                <div className={`${index === _index && m.items?.length && _currentUser.position !== "user" ? "h-8" : "h-0"} overflow-hidden transition-all duration-200 bg-org-button/5`}>
+                                    {
+                                        m.items?.map((it: { name: string, link: string, limit?: string }, index2: number) =>
+                                            <div key={index2} className='flex gap-2 h-8 cursor-pointer' onClick={() => toPage.push(it.link)}>
+                                                <div className='w-7'></div>
+                                                <p className='h-full flex flex-col justify-center  text-sm'>{it.name}</p>
+                                            </div>)
+                                    }
+                                </div>
+                            </div>
                     )
                 }
             </div>

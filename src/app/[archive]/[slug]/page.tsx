@@ -51,8 +51,8 @@ const Page = () => {
     }, [_currentUser, _currentUser.position, archive, slug, _refresh])
 
     return (
-        <div className='bg-white rounded-lg shadow-md p-2'>
-            <div className="font-bold uppercase h-24 flex flex-col justify-center text-center text-3xl">
+        <div className='p-2'>
+            <div className=" bg-whitefont-bold uppercase h-24 flex flex-col justify-center text-center text-3xl">
                 {convertArchive(archive)}{slug === "news" ? "登録" : null}
             </div>
             {archive === "user" && _item ? <DetailUser user={_item} /> : null}

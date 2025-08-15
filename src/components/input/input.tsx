@@ -23,7 +23,7 @@ export const Input = ({ onchange, value, sx, type, icon, disable }: Props) => {
                 onChange={(e) => { onchange(e.currentTarget.value) }}
                 onFocus={(e) => { e.currentTarget.style.outline = "none"; set_focus(true) }}
                 onBlur={() => set_focus(false)}
-                defaultValue={value}
+                value={value}
                 disabled={disable}
             ></input>
             {icon ? <div className='absolute w-max p-2 h-full top-0 right-0 flex flex-col justify-center text-center'>{icon}</div> : null}

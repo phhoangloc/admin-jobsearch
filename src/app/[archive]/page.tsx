@@ -5,7 +5,7 @@ import { convertArchive } from '@/lib/convert'
 import { ApiItemUser } from '@/api/user'
 import { UserType } from '@/redux/reducer/UserReduce'
 import store from '@/redux/store'
-import { Archive, ArchiveCategory, ArchiveFile } from '@/components/layout/archive'
+import { Archive, ArchiveFile } from '@/components/layout/archive'
 const Page = () => {
     const params = useParams<{ archive: string }>()
     const archive = params.archive
@@ -33,9 +33,9 @@ const Page = () => {
 
     useEffect(() => {
         if (_currentUser && _currentUser.id) {
-            getItems(_currentUser.position, archive, _currentUser.id.toString(), _page, 10)
+            getItems(_currentUser.position, archive, _currentUser.id.toString(), _page, 20)
         }
-    }, [_currentUser, _currentUser.position, archive, _page])
+    }, [_currentUser, _currentUser.position, archive, _page, _refresh])
 
     useEffect(() => {
         set_view_items(arr => [...arr, ..._items].filter((obj, index, self) => index === self.findIndex((o) => JSON.stringify(o) === JSON.stringify(obj))))
@@ -60,15 +60,9 @@ const Page = () => {
             <div className="font-bold uppercase h-12 flex flex-col justify-center text-3xl">
                 {convertArchive(archive)}
             </div>
-
-            {
-                archive === "category" ?
-                    <ArchiveCategory items={_items} event={() => set_refresh(n => n + 1)} />
-                    : null
-            }
             {
                 archive === "file" ?
-                    <ArchiveFile items={_items} event={() => set_refresh(n => n + 1)} />
+                    <ArchiveFile items={_view_items} event={() => set_refresh(n => n + 1)} />
                     : null
             }
             {

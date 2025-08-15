@@ -41,7 +41,8 @@ export const ApiItemUser = async ({ position, archive, hostId, search, id, slug,
     try {
         const result = await axios.get(process.env.api_url + "api/" + position +
             "/" + archive +
-            "?hostId=" + `${hostId ? hostId : ""}` +
+            "?archive=" + `${archive ? archive : ""}` +
+            "&hostId=" + `${hostId ? hostId : ""}` +
             "&search=" + `${search ? search : ""}` +
             "&id=" + `${id ? id : ""}` +
             "&slug=" + `${slug ? slug : ""}` +

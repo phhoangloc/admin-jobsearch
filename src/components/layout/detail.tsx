@@ -10,7 +10,6 @@ import TextArea from '../input/textarea'
 import { ApiItem, getAddress } from '@/api/client'
 import { japanRegions } from '@/lib/area'
 import ImageIcon from '@mui/icons-material/Image';
-import PicModal from '../modal/picModal'
 import Image from 'next/image'
 import FacilityModal from '../modal/faciclityModal'
 import ApartmentIcon from '@mui/icons-material/Apartment';
@@ -18,6 +17,9 @@ import moment from 'moment'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
 import { setModal } from '@/redux/reducer/ModalReduce'
+import ClearIcon from '@mui/icons-material/Clear';
+import AddIcon from '@mui/icons-material/Add';
+import { licenseList, workstatusList, worktypeList } from '@/lib/workstatus'
 type Props = {
     user: UserType,
 }
@@ -38,6 +40,7 @@ export const DetailUser = ({ user }: Props) => {
     const [_password, set_password] = useState<string>("")
     const [_facilityLimit, set_facilityLimit] = useState<number>(0)
     const [_edit_facility, set_edit_facility] = useState<number[]>([])
+    const [_edit_facility_name, set_edit_facility_name] = useState<string[]>([])
 
     const body = {
         username: _username || user.username,
@@ -96,6 +99,7 @@ export const DetailUser = ({ user }: Props) => {
     useEffect(() => {
         set_facilityLimit(user.facilitieslimit)
         set_edit_facility(user.editfacilities.map(f => f.facilityId))
+        set_edit_facility_name(user.editfacilities.map(f => f.facility.name))
     }, [user])
 
     const [_modalFacility, set_modalFacility] = useState<boolean>(false)
@@ -115,30 +119,47 @@ export const DetailUser = ({ user }: Props) => {
                     <div className='w-28'>パスワード</div>
                     <Input type='password' onchange={v => set_password(v)} value={""} sx='!w-72 !m-0' />
                 </div>
-                <Button name="CREATE" sx='!bg-org-button' disable={!_username || !_email || !_password} onClick={() => { create(body) }} />
+                <Button name="作成" sx='!bg-org-button' disable={!_username || !_email || !_password} onClick={() => { create(body) }} />
             </div>
             :
             <div>
-                <FacilityModal open={_modalFacility} share={(facility) => { set_edit_facility(crr => crr.includes(facility.id) ? crr.filter(cr => cr !== facility.id) : [...crr, facility.id]) }} currents={_edit_facility} />
+                <FacilityModal open={_modalFacility} share={(facility) => {
+                    set_edit_facility(crr => crr.includes(facility.id) ? crr.filter(cr => cr !== facility.id) : [...crr, facility.id]);
+                    set_edit_facility_name(crr => crr.includes(facility.name) ? crr.filter(cr => cr !== facility.name) : [...crr, facility.name]);
+                }} currents={_edit_facility} />
 
                 <div className='flex gap-2 mb-2'>
                     <div className='h-9 flex flex-col justify-center w-28'>ユーザー</div>
-                    <div className='flex flex-col justify-center w-72 border border-slate-200 px-2'>{user.username}</div>
+                    <div className='flex flex-col justify-center w-72 border border-slate-200 px-2 bg-white'>{user.username}</div>
                 </div>
                 <div className='flex gap-2 mb-2'>
                     <div className='h-9 flex flex-col justify-center w-28'>メール</div>
-                    <div className='flex flex-col justify-center w-72 border border-slate-200 px-2'>{user.email}</div>
+                    <div className='flex flex-col justify-center w-72 border border-slate-200 px-2 bg-white'>{user.email}</div>
                 </div>
                 <div className="h-3"></div>
                 <div className='flex gap-2 mb-2'>
                     <div className='h-9 flex flex-col justify-center w-44'>新しいパスワード</div>
                     <Input type='password' onchange={v => set_password(v)} value={_password} sx='!w-72 !m-0' />
                 </div>
-                {_currentUser.position === "admin" ?
-                    <ApartmentIcon className='!w-12 !h-12 p-2 cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)} />
-                    :
-                    null}
-                <Button name="SAVE" sx='!bg-org-button' disable={!_password && !_facilityLimit} onClick={() => { updateUser(body) }} />
+                <div>
+                    {_currentUser.position === "admin" ?
+                        <div className='mt-12 border rounded-md border-slate-300 bg-white'>
+                            <div className='flex h-12 justify-between bg-org-button/10 px-2'>
+                                <div className='h-full flex flex-col justify-center font-bold text-xl  '>施設</div>
+                                <AddIcon className='!w-12 !h-12 p-2 cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)} />
+                            </div>
+                            {
+                                _edit_facility_name.map((faName, index) => <div className='px-2 h-8 flex flex-col justify-center' key={index}>{faName}</div>)
+                            }
+                        </div>
+                        :
+                        null}
+
+                </div>
+                <div>
+
+                    <Button name="保存" sx='!bg-org-button' disable={!_password && !_facilityLimit} onClick={() => { updateUser(body) }} />
+                </div>
             </div>
     )
 }
@@ -240,7 +261,6 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
 
     return (
         <div>
-            <button className='block mx-auto mb-4 w-max bg-org-button text-white px-2 rounded shadow-md cursor-pointer' onClick={() => { toPage.push("/" + archive + "/news") }}>新規ニュース</button>
             <div className='mb-2'>
                 <div className='font-bold text-sm'>タイトル</div>
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
@@ -252,7 +272,7 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
 
             <div className="flex gap-1">
                 <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0' onClick={() => { toPage.back() }} />
-                {item ? <Button name="更新" sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> : <Button name="作成" sx='!bg-org-button !m-0' onClick={() => { createItem(body) }} />}
+                {item ? <Button name="保存" sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> : <Button name="作成" sx='!bg-org-button !m-0' onClick={() => { createItem(body) }} />}
             </div>
 
         </div>
@@ -325,7 +345,8 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
     const [_map, set_map] = useState<string>("")
     const [_video, set_video] = useState<string>("")
 
-    const [_modalImage, set_modalImage] = useState<boolean>(false)
+    const [_draft, set_draft] = useState<boolean>(false)
+
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
 
@@ -351,11 +372,43 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
             set_homepage(item.homepage)
             set_map(item.map)
             set_video(item.video)
-
+            set_draft(item.draft)
         } else {
             set_slug("facility_" + moment(new Date()).format("YYYY_MM_DD_hh_mm_ss"))
         }
     }, [item])
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const getFile = async (e: any) => {
+        const files = e.target.files;
+        const file: File | undefined = files ? files[0] : undefined
+        const reader: FileReader = new FileReader();
+        if (file) {
+            reader.readAsDataURL(file);
+            reader.onloadend = async function () {
+                const result = await ApiUploadFile({ position: _currentUser.position, archive: "file", file })
+                if (result.success) {
+                    store.dispatch(setModal({ open: true, value: "", msg: "アップロード成功！", type: "notification" }))
+                    setTimeout(() => {
+                        store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                    }, 3000);
+                    set_imageId(result.data.id)
+                    set_imagePreview(process.env.ftp_url + result.data.name)
+                    if (event) {
+                        event()
+                    }
+                } else {
+                    store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
+
+                    setTimeout(() => {
+                        store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                    }, 3000);
+
+                }
+            }
+        }
+
+    }
 
     const body = {
         name: _name,
@@ -374,18 +427,18 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
         homepage: _homepage,
         map: _map,
         video: _video,
-        draft: false,
+        draft: _draft,
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateItem = async (body: any) => {
-        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id: _id }, body)
+    const updateItem = async (id: number, body: any) => {
+        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id }, body)
         if (result.success) {
             store.dispatch(setModal({ open: true, value: "", msg: "更新成功！", type: "notification" }))
             setTimeout(() => {
                 store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
             }, 3000);
-            if (event) {
+            if (id != 84 && event) {
                 event()
             }
         } else {
@@ -519,11 +572,10 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
     }, [_email])
 
     const toPage = useRouter()
+
+
     return (
         <div>
-            <button className='block mx-auto mb-4 w-max bg-org-button text-white px-2 rounded shadow-md cursor-pointer' onClick={() => { toPage.push("/facility/news") }}>新規施設登録</button>
-
-            <PicModal open={_modalImage} share={(body) => { set_imagePreview(process.env.ftp_url + body.name); set_imageId(body.id); set_modalImage(false) }} />
             <div className='mb-2'>
                 <div className=' '>施設名 <span className='text-sm text-red-500'>必須</span></div>
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
@@ -533,8 +585,14 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <Input onchange={v => set_contenttitle(v)} value={_contenttitle} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=' '>アイキャッチ画像</div>
-                <ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' onClick={() => set_modalImage(!_modalImage)} />
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 mb）</span></div>
+                <div className='w-[200px] flex justify-between'>
+                    <UploadButton name={<ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' />} onClick={(e) => getFile(e)} />
+                    {_imagePreview ? <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500' onClick={() => {
+                        set_imageId(4)
+                        set_imagePreview("")
+                    }} /> : null}
+                </div>
                 {
                     _imagePreview ?
                         <Image src={_imagePreview} width="200" height="200" alt='img' />
@@ -590,19 +648,28 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <div className=''></div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
-            <div className='pt-4 pl-2'>状態 : <span className='font-bold'>{item?.draft ? "下書き" : "公開"}</span></div>
-            {item ?
-                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _postno && _phone && _address) { body.draft = true; updateItem(body) } }} >・下書き保存</div> :
-                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _postno && _phone && _address) { body.draft = true; createItem(body) } }}>・下書き保存</div>
-            }
-            <div className="flex gap-1">
-                <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                {item ?
-                    <Button name={item.draft ? "公開" : "更新"} sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> :
-                    <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_postno || !_phone || !_address} onClick={() => { createItem(body) }} />}
+
+            <div className='bg-white p-2 border border-slate-300 shadow rounded'>
+                <div className='mb-2 flex h-12 gap-2 my-2'>
+                    <div className='h-full flex flex-col justify-center'>状態 : </div>
+                    <div className='col-span-1 bg-white h-12 border  rounded active:outline-0 border-slate-300 w-20'>
+                        <select onChange={(e) => set_draft(e.target.value === "1" ? true : false)} value={_draft ? 1 : 0} className='pt-2 w-full flex flex-col justify-center h-full'>
+                            {/* <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option> */}
+                            {[{ name: "下書き", value: 1 }, { name: "公開", value: 0 }].map((item, index) =>
+                                <option className='text-black' key={index} value={item.value} >{item.name}</option>
+                            )}
+                        </select>
+                    </div>
+                </div>
+                <div className="flex gap-1">
+                    <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(84, body); window.open(process.env.home_url + "/facility/_preview", "_blank") }} />
+
+                    {item ?
+                        <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
+                        <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_postno || !_phone || !_address} onClick={() => { createItem(body) }} />}
+                </div>
             </div>
-
-
         </div>
     )
 }
@@ -678,6 +745,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
     const [_dayoff, set_dayoff] = useState<string>("")
     const [_startDate, set_startDate] = useState<Date>(new Date())
     const [_endDate, set_endDate] = useState<Date>(new Date())
+    const [_draft, set_draft] = useState<boolean>(false)
 
     const [_modalFacility, set_modalFacility] = useState<boolean>(false)
     const [_imagePreview, set_imagePreview] = useState<string>("")
@@ -708,6 +776,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             set_dayoff(item.dayoff)
             set_startDate(item.startDate)
             set_endDate(item.endDate)
+            set_draft(item.draft)
         } else {
             set_slug("post_" + moment(new Date).format("YYYY_MM_DD_hh_mm_ss"))
         }
@@ -726,26 +795,27 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
         worksalary: _workSalary,
         bonus: _bonus,
         workbenefit: _workbenefit,
-        imageId: _imageId || 2,
+        imageId: _imageId || 4,
         facilityId: _workplaceId,
         lisense: _lisense,
         dayoff: _dayoff,
         startDate: new Date(_startDate),
         endDate: new Date(_endDate),
-        draft: false
+        draft: _draft
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateItem = async (body: any) => {
-        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id: _id }, body)
+    const updateItem = async (id: number, body: any) => {
+        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id }, body)
         if (result.success) {
             store.dispatch(setModal({ open: true, value: "", msg: "更新成功！", type: "notification" }))
             setTimeout(() => {
                 store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
             }, 3000);
-            if (event) {
+            if (id != 7 && event) {
                 event()
             }
+
         } else {
             console.log(result.data)
             store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
@@ -855,6 +925,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             }, 3000);
         }
     }
+
     return (
         <div className='relative'>
             <div className={`${_openTagModal ? "fixed" : "hidden"} top-0 left-0 w-full h-full backdrop-brightness-90 backdrop-blur-sm z-1 flex flex-col justify-center'`}>
@@ -864,7 +935,6 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                     <div className='w-28 h-12 m-auto flex flex-col justify-center text-center border-2 border-org-button rounded-2xl cursor-pointer text-sm' onClick={() => { set_openTagModal(false); set_newTag("") }}>キャンセル</div>
                 </div>
             </div>
-            <button className='block mx-auto mb-4 w-max bg-org-button text-white px-2 rounded shadow-md cursor-pointer' onClick={() => { toPage.push("/" + archive + "/news") }}>新規求人情報登録</button>
 
             <FacilityModal open={_modalFacility} share={(body) => { set_workplaceName(body.name); set_workplaceId(body.id); set_modalFacility(false) }} current={{ id: _workplaceId }} />
             <div className='mb-2'>
@@ -872,8 +942,14 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>アイキャッチ画像</div>
-                <UploadButton name={<ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' />} onClick={(e) => getFile(e)} />
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 mb）</span></div>
+                <div className='w-[200px] flex justify-between'>
+                    <UploadButton name={<ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' />} onClick={(e) => getFile(e)} />
+                    {_imagePreview ? <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500' onClick={() => {
+                        set_imageId(4)
+                        set_imagePreview("")
+                    }} /> : null}
+                </div>
                 {
                     _imagePreview ?
                         <Image src={_imagePreview} width="200" height="200" alt='img' />
@@ -896,11 +972,21 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>職種</div>
-                <Input onchange={v => set_worktype(v)} value={_worktype} sx='!w-full !m-0' />
+                <div className='col-span-1 bg-white h-12 border border-slate-300 rounded text-lg'>
+                    <select onChange={(e) => set_worktype(e.target.value)} value={_worktype} className='pt-2 w-full flex flex-col justify-center h-full'>
+                        <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option>
+                        {worktypeList.map((item, index) =>
+                            <option className='' key={index} value={item.name} >{item.name}</option>
+                        )}
+                    </select>
+                </div>
+                <div className='text-sm px-2 opacity-50'>その他</div>
+                <Input onchange={v => { set_worktype(v) }} value={_worktype} sx='!w-full !m-0' />
+                <div className="h-2"></div>
             </div>
             <div className='mb-2'>
                 <div className=''>タグ</div>
-                <Input onchange={v => set_worktag(v)} value={_worktag.map(t => t.name).toString()} sx='!w-full !m-0' />
+                <Input onchange={v => set_worktag(v)} value={_worktag.map(t => t.name).toString()} sx='!w-full !m-0' disable />
                 <div className='flex gap-2 mt-2 flex-wrap'>
                     {_tag.map((tag, index) =>
                         <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer ${_worktag.map(t => t.id).includes(tag.id) ? "bg-org-button/25" : "bg-org-button/5"}`} key={index} onClick={() => set_worktag(crr => crr.map(t => t.id).includes(tag.id) ? crr.filter(cr => cr.id !== tag.id) : [...crr, tag])}>{tag.name}</div>
@@ -910,11 +996,32 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>雇用形態</div>
+                <div className='col-span-1 bg-white h-12 border border-slate-300 rounded text-lg'>
+                    <select onChange={(e) => set_workstatus(e.target.value)} value={_workstatus} className='pt-2 w-full flex flex-col justify-center h-full'>
+                        <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option>
+                        {workstatusList.map((item, index) =>
+                            <option className='' key={index} value={item.name} >{item.name}</option>
+                        )}
+                    </select>
+                </div>
+                <div className='text-sm px-2 opacity-50'>その他</div>
                 <Input onchange={v => set_workstatus(v)} value={_workstatus} sx='!w-full !m-0' />
+                <div className="h-2"></div>
+
             </div>
             <div className='mb-2'>
                 <div className=''>資格の有無</div>
+                <div className='col-span-1 bg-white h-12 border border-slate-300 rounded text-lg'>
+                    <select onChange={(e) => set_lisense(e.target.value)} value={_lisense} className='pt-2 w-full flex flex-col justify-center h-full'>
+                        <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option>
+                        {licenseList.map((item, index) =>
+                            <option className='' key={index} value={item.name} >{item.name}</option>
+                        )}
+                    </select>
+                </div>
+                <div className='text-sm px-2 opacity-50'>その他</div>
                 <Input onchange={v => set_lisense(v)} value={_lisense} sx='!w-full !m-0' />
+                <div className="h-2"></div>
             </div>
             <div className='mb-2'>
                 <div className=''>通勤時間</div>
@@ -930,32 +1037,40 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>福利福利厚生（自由にご記入ください）厚生</div>
-                <textarea onChange={e => set_workbenefit(e.currentTarget.value)} value={_workbenefit} className='!w-full !m-0 border border-slate-300 rounded h-36' />
+                <textarea onChange={e => set_workbenefit(e.currentTarget.value)} value={_workbenefit} className='!w-full !m-0 border border-slate-300 rounded h-36 bg-white p-2' />
             </div>
             <div className='mb-2'>
                 <div className=''>掲載日</div>
                 <Input key={moment(_startDate).format("YYYY-MM-DD")} type='date' onchange={v => set_startDate(v)} value={moment(_startDate).format("YYYY-MM-DD")} sx='!w-full !m-0' />
             </div>
-            <div className='mb-2'>
+            {/* <div className='mb-2'>
                 <div className=''>掲載終了日</div>
                 <Input key={moment(_endDate).format("YYYY-MM-DD")} type='date' onchange={v => set_endDate(v)} value={moment(_endDate).format("YYYY-MM-DD")} sx='!w-full !m-0' />
-            </div>
+            </div> */}
             <div className='mb-2'>
                 <div className=''>自由記入欄 （求人の内容や、施設の紹介をご記入ください）</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
-            <div className='pt-4 pl-2'>状態 : <span className='font-bold'>{item?.draft ? "下書き" : "公開"}</span></div>
-            {item ?
-                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _workplaceId) { body.draft = true; updateItem(body) } }} >・下書き保存</div> :
-                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _workplaceId) { body.draft = true; createItem(body) } }}>・下書き保存</div>
-            }
-            <div className="flex gap-1">
-                <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                {item ?
-                    <Button name={item.draft ? "公開" : "更新"} sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> :
-                    <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
+            <div className='bg-white p-2 border border-slate-300 shadow rounded'>
+                <div className='mb-2 flex h-12 gap-2 my-2'>
+                    <div className='h-full flex flex-col justify-center'>状態 : </div>
+                    <div className='col-span-1 bg-white h-12 border  rounded active:outline-0 border-slate-300 w-20'>
+                        <select onChange={(e) => set_draft(e.target.value === "1" ? true : false)} value={_draft ? 1 : 0} className='pt-2 w-full flex flex-col justify-center h-full'>
+                            {/* <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option> */}
+                            {[{ name: "下書き", value: 1 }, { name: "公開", value: 0 }].map((item, index) =>
+                                <option className='text-black' key={index} value={item.value} >{item.name}</option>
+                            )}
+                        </select>
+                    </div>
+                </div>
+                <div className="flex gap-1">
+                    <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={() => { toPage.back() }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(7, body); window.open(process.env.home_url + "/post/_preview", "_blank") }} />
+                    {item ?
+                        <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
+                        <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
+                </div>
             </div>
-
         </div>
     )
 }
@@ -1004,6 +1119,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
     const [_workplaceName, set_workplaceName] = useState<string>("")
     const [_workplaceId, set_workplaceId] = useState<number>(0)
     const [_video, set_video] = useState<string>("")
+    const [_draft, set_draft] = useState<boolean>(false)
 
     const [_modalFacility, set_modalFacility] = useState<boolean>(false)
     const [_imagePreview, set_imagePreview] = useState<string>("")
@@ -1023,6 +1139,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
             set_workplaceName(item.workplace.name)
             set_video(item.video)
             set_contenttitle(item.contenttitle)
+            set_draft(item.draft)
         } else {
             set_slug("post_" + moment(new Date).format("YYYY_MM_DD_hh_mm_ss"))
         }
@@ -1037,18 +1154,18 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
         facilityId: _workplaceId,
         video: _video,
         contenttitle: _contenttitle,
-        draft: false
+        draft: _draft
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateItem = async (body: any) => {
-        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id: _id }, body)
+    const updateItem = async (id: number, body: any) => {
+        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id }, body)
         if (result.success) {
             store.dispatch(setModal({ open: true, value: "", msg: "更新成功！", type: "notification" }))
             setTimeout(() => {
                 store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
             }, 3000);
-            if (event) {
+            if (id != 3 && event) {
                 event()
             }
         } else {
@@ -1104,7 +1221,6 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
     }
     return (
         <div>
-            <button className='block mx-auto mb-4 w-max bg-org-button text-white px-2 rounded shadow-md cursor-pointer' onClick={() => { toPage.push("/" + archive + "/news") }}>新規求人情報登録</button>
 
             <FacilityModal open={_modalFacility} share={(body) => { set_workplaceName(body.name); set_workplaceId(body.id); set_modalFacility(false) }} current={{ id: _workplaceId }} />
             <div className='mb-2'>
@@ -1112,8 +1228,14 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>アイキャッチ画像</div>
-                <UploadButton name={<ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' />} onClick={(e) => getFile(e)} />
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 mb）</span></div>
+                <div className='w-[200px] flex justify-between'>
+                    <UploadButton name={<ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' />} onClick={(e) => getFile(e)} />
+                    {_imagePreview ? <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500' onClick={() => {
+                        set_imageId(4)
+                        set_imagePreview("")
+                    }} /> : null}
+                </div>
                 {
                     _imagePreview ?
                         <Image src={_imagePreview} width="200" height="200" alt='img' />
@@ -1145,16 +1267,26 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 <div className=''>自由記入欄 （求人の内容や、インタビューの紹介をご記入ください）</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
-            <div className='pt-4 pl-2'>状態 : <span className='font-bold'>{item?.draft ? "下書き" : "公開"}</span></div>
-            {item ?
-                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _workplaceId) { body.draft = true; updateItem(body) } }} >・下書き保存</div> :
-                <div className='mt-4 mb-2 cursor-pointer text-sm hover:text-org-button' onClick={() => { if (_name && _workplaceId) { body.draft = true; createItem(body) } }}>・下書き保存</div>
-            }
-            <div className="flex gap-1">
-                <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0' onClick={() => { toPage.back() }} />
-                {item ?
-                    <Button name={item.draft ? "公開" : "更新"} sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { updateItem(body) }} /> :
-                    <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
+            <div className='bg-white p-2 border border-slate-300 shadow rounded'>
+                <div className='mb-2 flex h-12 gap-2 my-2'>
+                    <div className='h-full flex flex-col justify-center'>状態 : </div>
+                    <div className='col-span-1 bg-white h-12 border  rounded active:outline-0 border-slate-300 w-20'>
+                        <select onChange={(e) => set_draft(e.target.value === "1" ? true : false)} value={_draft ? 1 : 0} className='pt-2 w-full flex flex-col justify-center h-full'>
+                            {/* <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option> */}
+                            {[{ name: "下書き", value: 1 }, { name: "公開", value: 0 }].map((item, index) =>
+                                <option className='text-black' key={index} value={item.value} >{item.name}</option>
+                            )}
+                        </select>
+                    </div>
+                </div>
+                <div className="flex gap-1">
+                    <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(3, body); window.open(process.env.home_url + "/interview/_preview", "_blank") }} />
+
+                    {item ?
+                        <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
+                        <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
+                </div>
             </div>
 
         </div>
