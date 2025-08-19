@@ -3,7 +3,7 @@ import { CompositeDecorator, Editor, EditorState } from 'draft-js'
 import { stateToHTML } from 'draft-js-export-html'
 import { stateFromHTML } from 'draft-js-import-html'
 import React, { useEffect, useRef, useState } from 'react'
-// import ImageIcon from '@mui/icons-material/Image';
+// import AddIcon from '@mui/icons-material/Add';
 // import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 // import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 // import FormatBoldIcon from '@mui/icons-material/FormatBold';
@@ -11,7 +11,8 @@ import React, { useEffect, useRef, useState } from 'react'
 // import PlaylistAddCircleIcon from '@mui/icons-material/PlaylistAddCircle';
 type Props = {
     value: string,
-    onchange: (v: string) => void
+    onchange: (v: string) => void,
+    picButton?: boolean
 }
 const Image = (props: any) => {
     const { src } = props.contentState.getEntity(props.entityKey).getData();
@@ -89,8 +90,11 @@ const TextArea = ({ value, onchange }: Props) => {
     // const createInlineStyle = (value: any, type: string) => {
     //     set_EditorState(RichUtils.toggleInlineStyle(value, type));
     // }
-    // const createImage = async (url: string) => {
+    // const createImage = async (editorState: EditorState) => {
+    //     const selection = editorState.getSelection();
     //     const content = _editorState.getCurrentContent();
+    //     const block = content.getBlockForKey(selection.getStartKey());
+    //     const url = block.getText()
     //     const contentStateWithEntity = content.createEntity('IMAGE', 'MUTABLE', { src: url });
     //     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     //     const newEditorState = AtomicBlockUtils.insertAtomicBlock(_editorState, entityKey, ' ');
@@ -112,16 +116,16 @@ const TextArea = ({ value, onchange }: Props) => {
 
     const editRef: any = useRef("")
 
-    function myBlockStyleFn(contentBlock: { getType: () => string; }) {
-        const type = contentBlock.getType();
-        if (type === 'text-center') {
-            return 'text-center';
-        }
-        if (type === 'text-right') {
-            return 'text-right';
-        }
-        return '';
-    }
+    // function myBlockStyleFn(contentBlock: { getType: () => string; }) {
+    //     const type = contentBlock.getType();
+    //     if (type === 'text-center') {
+    //         return 'text-center';
+    //     }
+    //     if (type === 'text-right') {
+    //         return 'text-right';
+    //     }
+    //     return '';
+    // }
     // const getCurrentBlockType = (editorState: EditorState) => {
     //     const selection = editorState.getSelection();
     //     const content = editorState.getCurrentContent();
@@ -130,93 +134,24 @@ const TextArea = ({ value, onchange }: Props) => {
     // };
     // const sx = `!h-full !w-full m-auto p-2 font-bold flex flex-col justify-center text-center`
 
-    // const tool = [
-    //     {
-    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-one" ? "bg-orange-600" : "bg-org-button"}`}>{`h1`}</div>,
-    //         func: () => createBlockStyle(_editorState, "header-one"),
-    //         type: "header-one",
-    //     },
-    //     {
-    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-two" ? "bg-orange-600" : "bg-org-button"}`}>{`h2`}</div>,
-    //         func: () => createBlockStyle(_editorState, "header-two"),
-    //         type: "header-two",
-    //     },
-    //     {
-    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-three" ? "bg-orange-600" : "bg-org-button"}`}>{`h3`}</div>,
-    //         func: () => createBlockStyle(_editorState, "header-three"),
-    //         type: "header-three",
-    //     },
-    //     {
-    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-four" ? "bg-orange-600" : "bg-org-button"}`}>{`h4`}</div>,
-    //         func: () => createBlockStyle(_editorState, "header-four"),
-    //         type: "header-four",
-    //     },
+    // const [_toolOpen, set_toolOpen] = useState<boolean>(false)
+    // const [_toolInputOpen, set_toolInputOpen] = useState<boolean>(false)
+    // const [_toolIndex, set_toolIndex] = useState<number>(0)
 
-    //     {
-    //         name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "header-five" ? "bg-orange-600" : "bg-org-button"}`}>{`h5`}</div>,
-    //         func: () => createBlockStyle(_editorState, "header-five"),
-    //         type: "header-five",
-    //     },
-    //     // {
-    //     //     name: <div className={`${sx} text-white ${getCurrentBlockType(_editorState) === "code-block" ? "bg-orange-600" : "bg-org-button"}`}>{`</>`}</div>,
-    //     //     func: () => createBlockStyle(_editorState, "code-block"),
-    //     //     type: "code-block",
-    //     // },
-    //     {
-    //         name: <FormatBoldIcon className={`!h-full !w-full m-auto p-2 text-white ${_editorState.getCurrentInlineStyle().has("BOLD") ? "bg-orange-600" : "bg-org-button"}`} />,
-    //         func: () => createInlineStyle(_editorState, "BOLD"),
-    //         type: "BOLD",
-    //     },
-    //     {
-    //         name: <FormatItalicIcon className={`!h-full !w-full m-auto p-2 text-white ${_editorState.getCurrentInlineStyle().has("ITALIC") ? "bg-orange-600" : "bg-org-button"}`} />,
-    //         func: () => createInlineStyle(_editorState, "ITALIC"),
-    //         type: "ITALIC",
-    //     },
-    //     // {
-    //     //     name: <ImageIcon className={`${sx} text-white bg-white cursor-pointer`} />,
-    //     //     func: () => set_isGetPic(true),
-    //     // },
-    //     // {
-    //     //     name: <PlaylistAddCircleIcon className={`${sx} text-white bg-white cursor-pointer`} />,
-    //     //     func: () => set_isGetAudio(true),
-    //     // },
-    //     {
-    //         name: <FormatAlignCenterIcon className={`${sx} text-white ${getCurrentBlockType(_editorState) === "text-center" ? "bg-orange-600" : "bg-org-button"}`} />,
-    //         func: () => makeTextCenter(_editorState),
-    //         type: "text-center",
-    //     },
-    //     {
-    //         name: <FormatAlignRightIcon className={`${sx} text-white ${getCurrentBlockType(_editorState) === "text-right" ? "bg-orange-600" : "bg-org-button"}`} />,
-    //         func: () => makeTextRight(_editorState),
-    //         type: "text-right",
-    //     },
-    // ]
-
-    // const getUrl = (url: string) => {
-    //     if (_isGetPic) {
-    //         createImage(url)
-    //     }
-    //     if (_isGetAudio) {
-    //         addAudio(url)
-    //     }
-
-    //     set_isGetAudio(false)
-    //     set_isGetPic(false)
-    // }
     return (
         <div className=' rounded'>
-            {/* <div className='sticky top-0 py-1 flex gap-1 z-[1] flex-wrap'>
-                {
-                    tool.map((tl, index) =>
-                        <div key={index}
-                            className={`h-10 aspect-square overflow-hidden shadow rounded`}
-                            onClick={tl.func}>{tl.name}</div>
-                    )
-                }
-            </div> */}
+            <div className='h-12 sticky top-0 py-1 flex gap-1 z-[1] justify-between'>
+                <div></div>
+                {/* <AddIcon className='!w-10 !h-10 p-1 cursor-pointer' onClick={() => set_toolOpen(!_toolOpen)} /> */}
+                {/* <div className={`${_toolOpen ? "block" : "hidden"} absolute right-1 top-13 h-24 shadow-md bg-white border border-slate-300 rounded-md overflow-hidden`}>
+                    <div className="h-12 px-4 flex flex-col justify-center hover:bg-slate-100 cursor-pointer" onClick={() => { set_toolIndex(1); set_toolOpen(false) }}>画像を追加</div>
+                    <div className="h-[1px] w-full bg-slate-300"></div>
+                    <div className="h-12 px-4 flex flex-col justify-center hover:bg-slate-100 cursor-pointer" onClick={() => { set_toolIndex(2); set_toolOpen(false) }}>リンクを追加</div>
+                </div> */}
+            </div>
 
             <div className='dangerous_box border bg-white border-slate-300 min-h-96 p-4 overflow-x-auto scroll_none cursor-text text-justify text-sm md:text-base' onClick={() => editRef.current.focus()}>
-                <Editor ref={editRef} editorState={_editorState} onChange={(editorState) => set_EditorState(editorState)} blockStyleFn={myBlockStyleFn} />
+                <Editor ref={editRef} editorState={_editorState} onChange={(editorState) => set_EditorState(editorState)} />
             </div>
         </div>
     )

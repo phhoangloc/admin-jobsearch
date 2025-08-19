@@ -36,7 +36,7 @@ const PicModal = ({ open, share }: Props) => {
     }, [_currentUser.position, _refresh])
 
     return (
-        <div className={`fixed top-0 right-0 w-2/3 max-w-[768px] bg-white z-[1] shadow-lg h-full transition-all duration-500 p-2 ${open ? "translate-x-0" : "translate-x-[100%]"}`}>
+        <div className={`fixed top-0 right-0 w-2/3 max-w-[768px] bg-white z-3 shadow-lg h-full transition-all duration-500 p-2 ${open ? "translate-x-0" : "translate-x-[100%]"}`}>
             <div className='h-9 flex flex-col justify-center  font-bold text-lg text-org-button border-b'>写真</div>
             <ArchiveFile items={_items} event={() => set_refresh(r => r + 1)} share={(body) => share && share(body)} />
         </div>

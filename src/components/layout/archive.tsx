@@ -132,17 +132,20 @@ export const Archive = ({ items, allItemCount, event, archive }: Props) => {
                 null}
             <div className="h-6"></div>
             <div className="bg-white shadow rounded ">
-                <div className='h-9'>
-                    <div className='h-full px-2 flex flex-col justify-center font-bold'>タイトル/名前</div>
+                <div className='h-9 grid grid-cols-12 px-2'>
+                    <div className='h-full flex flex-col justify-center font-bold col-span-8'>タイトル/名前</div>
+                    <div className='h-full flex flex-col justify-center font-bold col-span-2'>{archive !== "user" ? "投稿者" : ""}</div>
+                    <div className='h-full flex flex-col justify-center font-bold col-span-1 text-center'>状況</div>
                 </div>
                 {
                     items.map((it, index) =>
                         <div className='grid grid-cols-12 even:bg-slate-100 p-2 cursor-pointer'
                             key={index}>
-                            <div onClick={() => !it.slug ? toPage.push("user/" + it.id) : toPage.push(it.archive + "/" + it.slug)} className='w-full max-w-96 line-clamp-1 col-span-10'>
+                            <div onClick={() => !it.slug ? toPage.push("user/" + it.id) : toPage.push(it.archive + "/" + it.slug)} className='w-full max-w-96 line-clamp-1 col-span-8'>
                                 {it.name || it.username || it.title}
                             </div>
-                            <div className='col-span-1 text-center'>{it.draft ? "下書き" : "公開"}</div>
+                            <div className='col-span-2 text-sm opacity-75'>{it.host?.username}</div>
+                            <div className='col-span-1 text-center opacity-75'>{it.draft ? "下書き" : "公開"}</div>
                             {/* <div className='opacity-50 text-sm w-12'>{it.position ? it.position : null}</div> */}
                             <div className="col-span-1">
                                 {_currentUser.position === "user" ? null : <DeleteIcon className='text-org-button m- !block' onClick={() => { store.dispatch(setModal({ open: true, type: "confirm", msg: "ニュースを削除してもよろしいでしょうか。", value: "" })); set_id(it.id) }} />}
@@ -232,7 +235,7 @@ export const ArchiveFile = ({ items, event }: Props) => {
     return (
         <div>
             <div className='px-2'>{items.length} 枚があります</div>
-            <div className='text-sm opacity-75 px-2'>最大アップロードサイズ 2 mb。</div>
+            <div className='text-sm opacity-75 px-2'>最大アップロードサイズ 2 MB。</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 p-2 ">
                 <div className=' aspect-square flex flex-col justify-center shadow border border-slate-200 rounded bg-white'>
                     <UploadButton sx='!w-12 !h-12 m-auto' name={<AddIcon className='!h-full !w-full text-sky-600 cursor-pointer' />} onClick={(e) => getFile(e)} />

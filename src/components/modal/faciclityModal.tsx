@@ -8,10 +8,11 @@ import { Input } from '../input/input'
 type Props = {
     open: boolean,
     current?: { id: number },
+    close?: () => void,
     currents?: number[],
     share?: ({ id, name }: { id: number, name: string }) => void,
 }
-const FacilityModal = ({ open, current, currents, share }: Props) => {
+const FacilityModal = ({ open, close, current, currents, share }: Props) => {
 
     const [_currentUser, set_currentUser] = useState<UserType>(store.getState().user)
 
@@ -40,20 +41,24 @@ const FacilityModal = ({ open, current, currents, share }: Props) => {
 
 
     return (
-        <div className={`fixed top-0 right-0 w-2/3 max-w-[768px] bg-white z-[29] shadow-lg h-full overflow-auto transition-all duration-500 p-2 ${open ? "translate-x-0" : "translate-x-[100%]"} none-scr`}>
-            <div className='h-16 flex border-b border-org-button'>
-                <div className='h-full !w-20 flex flex-col justify-center  font-bold text-lg text-org-button  '>施設 </div>
-                <Input value={_search} onchange={(v) => set_search(v)} /></div>
-            <div className="h-6"></div>
-            {_items.map((item, index) =>
-                <div className={`h-24 border border-slate-200 flex p-1 cursor-pointer rounded ${current?.id === item.id || currents?.includes(item.id) ? "!border-org-button !border-2" : ""}`} key={index} onClick={() => share && share({ id: item.id, name: item.name })}>
-                    <div className='h-full aspect-square relative'>
-                        <Image src={process.env.ftp_url + item.image.name} fill className='object-cover' alt='img' />
-                    </div>
-                    <div className='px-2 text-lg'>
-                        {item.name}
-                    </div>
-                </div>)}
+        <div className={`fixed w-screen h-screen top-0 left-0 z-2 backdrop-brightness-75 backdrop-blur-sm ${open ? "scale-100" : "scale-0"}`}>
+
+            <div className='absolute w-full h-full z-0' onClick={() => close && close()}></div>
+            <div className={`w-11/12 max-w-(--sm) m-auto bg-white p-2 h-full overflow-auto none-scr z-1 relative`} >
+                <div className='h-16 flex border-b border-org-button'>
+                    <div className='h-full !w-20 flex flex-col justify-center  font-bold text-lg text-org-button  '>施設 </div>
+                    <Input value={_search} onchange={(v) => set_search(v)} /></div>
+                <div className="h-6"></div>
+                {_items.map((item, index) =>
+                    <div className={`h-24 border border-slate-200 flex p-1 cursor-pointer rounded ${current?.id === item.id || currents?.includes(item.id) ? "!border-org-button !border-2" : ""}`} key={index} onClick={() => share && share({ id: item.id, name: item.name })}>
+                        <div className='h-full aspect-square relative'>
+                            <Image src={process.env.ftp_url + item.image.name} fill className='object-cover' alt='img' />
+                        </div>
+                        <div className='px-2 text-lg'>
+                            {item.name}
+                        </div>
+                    </div>)}
+            </div>
         </div>
     )
 }

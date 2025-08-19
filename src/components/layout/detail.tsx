@@ -9,10 +9,8 @@ import { setRefresh } from '@/redux/reducer/RefreshReduce'
 import TextArea from '../input/textarea'
 import { ApiItem, getAddress } from '@/api/client'
 import { japanRegions } from '@/lib/area'
-import ImageIcon from '@mui/icons-material/Image';
 import Image from 'next/image'
 import FacilityModal from '../modal/faciclityModal'
-import ApartmentIcon from '@mui/icons-material/Apartment';
 import moment from 'moment'
 import { useRouter } from 'next/navigation'
 import { useParams } from 'next/navigation'
@@ -20,6 +18,7 @@ import { setModal } from '@/redux/reducer/ModalReduce'
 import ClearIcon from '@mui/icons-material/Clear';
 import AddIcon from '@mui/icons-material/Add';
 import { licenseList, workstatusList, worktypeList } from '@/lib/workstatus'
+import UploadIcon from '@mui/icons-material/Upload';
 type Props = {
     user: UserType,
 }
@@ -144,7 +143,7 @@ export const DetailUser = ({ user }: Props) => {
                 <FacilityModal open={_modalFacility} share={(facility) => {
                     set_edit_facility(crr => crr.includes(facility.id) ? crr.filter(cr => cr !== facility.id) : [...crr, facility.id]);
                     set_edit_facility_name(crr => crr.includes(facility.name) ? crr.filter(cr => cr !== facility.name) : [...crr, facility.name]);
-                }} currents={_edit_facility} />
+                }} currents={_edit_facility} close={() => set_modalFacility(false)} />
 
                 <div className='flex gap-2 mb-2'>
                     <div className='h-9 flex flex-col justify-center w-28'>ユーザー</div>
@@ -627,17 +626,20 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <Input onchange={v => set_contenttitle(v)} value={_contenttitle} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 mb）</span></div>
-                <div className='w-[200px] flex justify-between'>
-                    <UploadButton name={<ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' />} onClick={(e) => getFile(e)} />
-                    {_imagePreview ? <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500' onClick={() => {
-                        set_imageId(4)
-                        set_imagePreview("")
-                    }} /> : null}
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
+                <div className='w-max flex justify-between'>
+                    <UploadButton name={<div className='border rounded-3xl py-1 px-4 bg-white'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>
                 {
                     _imagePreview ?
-                        <Image src={_imagePreview} width="200" height="200" alt='img' />
+                        <div className='w-full max-w-(--xs)'>
+                            <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500 !block ml-auto mr-0' onClick={() => {
+                                set_imageId(4)
+                                set_imagePreview("")
+                            }} />
+                            <Image src={_imagePreview} width="200" height="200" className='w-full' alt='img' />
+
+                        </div>
                         : null
                 }
             </div>
@@ -978,29 +980,31 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 </div>
             </div>
 
-            <FacilityModal open={_modalFacility} share={(body) => { set_workplaceName(body.name); set_workplaceId(body.id); set_modalFacility(false) }} current={{ id: _workplaceId }} />
+            <FacilityModal open={_modalFacility} share={(body) => { set_workplaceName(body.name); set_workplaceId(body.id); set_modalFacility(false) }} current={{ id: _workplaceId }} close={() => set_modalFacility(false)} />
             <div className='mb-2'>
                 <div className=''>タイトル <span className='text-red-500 text-sm'>必須</span></div>
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 mb）</span></div>
-                <div className='w-[200px] flex justify-between'>
-                    <UploadButton name={<ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' />} onClick={(e) => getFile(e)} />
-                    {_imagePreview ? <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500' onClick={() => {
-                        set_imageId(4)
-                        set_imagePreview("")
-                    }} /> : null}
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
+                <div className='w-max flex justify-between'>
+                    <UploadButton name={<div className='border rounded-3xl py-1 px-4 bg-white'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>
                 {
                     _imagePreview ?
-                        <Image src={_imagePreview} width="200" height="200" alt='img' />
+                        <div className='w-full max-w-(--xs)'>
+                            <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500 !block ml-auto mr-0' onClick={() => {
+                                set_imageId(4)
+                                set_imagePreview("")
+                            }} />
+                            <Image src={_imagePreview} width="500" height="500" className='w-full' alt='img' />
+                        </div>
                         : null
                 }
             </div>
             <div className='mb-2'>
                 <div className=''>事業所 <span className='text-red-500 text-sm'>必須</span></div>
-                <ApartmentIcon className='!w-12 !h-12 p-2 cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)} />
+                <div className='border rounded-md  px-4 bg-white w-max mb-2 h-12 flex flex-col justify-center cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)}> 施設を選択</div>
                 <Input onchange={v => console.log(v)} value={_workplaceName} sx='!w-full !m-0' disable />
             </div>
             <div className='mb-2'>
@@ -1179,7 +1183,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
             set_contenttitle(item.contenttitle)
             set_draft(item.draft)
         } else {
-            set_slug("post_" + moment(new Date).format("YYYY_MM_DD_hh_mm_ss"))
+            set_slug("interview_" + moment(new Date).format("YYYY_MM_DD_hh_mm_ss"))
         }
     }, [item])
 
@@ -1257,45 +1261,48 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
         }
 
     }
+    const [_isHover1, set_isHover1] = useState<boolean>(false)
     return (
         <div>
-
-            <FacilityModal open={_modalFacility} share={(body) => { set_workplaceName(body.name); set_workplaceId(body.id); set_modalFacility(false) }} current={{ id: _workplaceId }} />
+            <FacilityModal open={_modalFacility} share={(body) => { set_workplaceName(body.name); set_workplaceId(body.id); set_modalFacility(false) }} current={{ id: _workplaceId }} close={() => set_modalFacility(false)} />
             <div className='mb-2'>
                 <div className=''>タイトル <span className='text-red-500 text-sm'>必須</span></div>
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 mb）</span></div>
-                <div className='w-[200px] flex justify-between'>
-                    <UploadButton name={<ImageIcon className='!w-12 !h-12 p-2 cursor-pointer' />} onClick={(e) => getFile(e)} />
-                    {_imagePreview ? <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500' onClick={() => {
-                        set_imageId(4)
-                        set_imagePreview("")
-                    }} /> : null}
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
+                <div className='w-max flex justify-between'>
+                    <UploadButton name={<div className='border rounded-3xl py-1 px-4 bg-white'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>
                 {
                     _imagePreview ?
-                        <Image src={_imagePreview} width="200" height="200" alt='img' />
+                        <div className='w-full max-w-(--xs)'>
+                            <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500 !block ml-auto mr-0' onClick={() => {
+                                set_imageId(4)
+                                set_imagePreview("")
+                            }} />
+                            <Image src={_imagePreview} width="200" height="200" className='w-full' alt='img' />
+
+                        </div>
                         : null
                 }
             </div>
             <div className='mb-2'>
                 <div className=''>事業所 <span className='text-red-500 text-sm'>必須</span></div>
-                <ApartmentIcon className='!w-12 !h-12 p-2 cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)} />
+                <div className='border rounded-md  px-4 bg-white w-max mb-2 h-12 flex flex-col justify-center cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)}> 施設を選択</div>
                 <Input onchange={v => console.log(v)} value={_workplaceName} sx='!w-full !m-0' disable />
             </div>
             <div className='mb-2'>
                 <div className=''>職種</div>
                 <Input onchange={v => set_worktype(v)} value={_worktype} sx='!w-full !m-0' />
             </div>
-            <div className='mb-2'>
-                <div className=''>紹介動画 YouTube URL</div>
-                <Input onchange={v => set_video(v)} value={_video} sx='!w-full !m-0' />
-            </div>
-            <div className='mb-2'>
-                <div className=''>求人URLを変更できます（英数字でご記入ください）</div>
-                <Input onchange={v => set_slug(v)} value={_slug} sx='!w-full !m-0' />
+            <div className='mb-2 relative w-full' onMouseLeave={() => set_isHover1(false)}>
+                <div>紹介動画 YouTube URL <span className='text-sm opacity-50 hover:underline cursor-pointer' onMouseEnter={() => set_isHover1(true)}>埋め込みかた</span>
+                    <div className={`absolute top-[50%] left-[5%] h-(--xs) w-11/12 max-w-(--xs) bg-white z-1 ${_isHover1 ? "block" : "hidden"} shadow border-2 border-org-button rounded-md`} onMouseLeave={() => set_isHover1(false)}>
+                        <Image src={"/gif/sample.gif"} fill className='object-cover' alt='gif' />
+                    </div>
+                </div>
+                <Input onchange={v => set_video(v)} value={_video} sx='!w-full !m-0 relative z-0' />
             </div>
             <div className='mb-2'>
                 <div className=''>自由記入欄 （インタビュー対象者の挨拶）</div>
@@ -1303,7 +1310,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>インタビューの内容</div>
-                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
+                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} picButton={true} />
             </div>
             <div className='bg-white p-2 border border-slate-300 shadow rounded'>
                 <div className='mb-2 flex h-12 gap-2 my-2'>
