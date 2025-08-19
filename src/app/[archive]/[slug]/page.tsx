@@ -19,6 +19,9 @@ const Page = () => {
     useEffect(() => {
         update()
     }, [])
+
+    const [_warn, set_warn] = useState<string>("")
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [_item, set_item] = useState<any>()
 
@@ -30,17 +33,23 @@ const Page = () => {
                     const result = await ApiItemUser({ position, archive, id: Number(slug) })
                     if (result.success) {
                         set_item(result.data)
+                    } else {
+                        set_warn(result.msg)
                     }
                 } else {
                     const result = await ApiItemUser({ position, archive, id: Number(slug) })
                     if (result.success) {
                         set_item(result.data[0])
                     }
+
                 }
             } else {
                 const result = await ApiItemUser({ position, archive, hostId, slug })
                 if (result.success) {
                     set_item(result.data[0])
+                }
+                else {
+                    set_warn(result.msg)
                 }
             }
 
@@ -55,6 +64,7 @@ const Page = () => {
             <div className=" bg-whitefont-bold uppercase h-24 flex flex-col justify-center text-center text-3xl">
                 {convertArchive(archive)}{slug === "news" ? "登録" : null}
             </div>
+            {_warn ? <div className='text-red-500 text-center'>{_warn}<br></br>アカウントを有効にするように、管理者に連絡してください。</div> : null}
             {archive === "user" && _item ? <DetailUser user={_item} /> : null}
             {archive === "news" && (_item || slug === "news") ? <DetailNews item={_item} event={() => set_refresh(n => n + 1)} archive={archive} /> : null}
             {archive === "facility" && (_item || slug === "news") ? <DetailFacility item={_item} event={() => set_refresh(n => n + 1)} archive={archive} /> : null}

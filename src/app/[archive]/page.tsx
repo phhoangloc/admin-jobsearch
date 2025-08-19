@@ -18,6 +18,8 @@ const Page = () => {
         update()
     }, [])
 
+    const [_warn, set_warn] = useState<string>("")
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [_items, set_items] = useState<any[]>([])
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,6 +30,8 @@ const Page = () => {
         const result = await ApiItemUser({ position, archive, hostId, skip: page * limit, limit })
         if (result.success) {
             set_items(result.data)
+        } else {
+            set_warn(result.msg)
         }
     }
 
@@ -60,6 +64,7 @@ const Page = () => {
             <div className="font-bold uppercase h-12 flex flex-col justify-center text-3xl">
                 {convertArchive(archive)}
             </div>
+            {_warn ? <div className='text-red-500'>{_warn}<br></br>アカウントを有効にするように、管理者に連絡してください。</div> : null}
             {
                 archive === "file" ?
                     <ArchiveFile items={_view_items} event={() => set_refresh(n => n + 1)} />

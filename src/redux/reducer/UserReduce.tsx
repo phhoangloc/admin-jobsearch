@@ -8,7 +8,9 @@ export type UserType = {
     email: string,
     position: string,
     active: boolean,
-    facilitieslimit: number
+    facilitieslimit: number,
+    createdAt: Date,
+    expiredAt: Date
     editfacilities: {
         facilityId: number,
         facility: {

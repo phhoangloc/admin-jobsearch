@@ -41,6 +41,7 @@ export const DetailUser = ({ user }: Props) => {
     const [_facilityLimit, set_facilityLimit] = useState<number>(0)
     const [_edit_facility, set_edit_facility] = useState<number[]>([])
     const [_edit_facility_name, set_edit_facility_name] = useState<string[]>([])
+    const [_newExpired, set_newExpired] = useState<Date>()
 
     const body = {
         username: _username || user.username,
@@ -49,6 +50,7 @@ export const DetailUser = ({ user }: Props) => {
         facilitieslimit: Number(_facilityLimit) || user.facilitieslimit,
         active: true,
         edit_facility: _edit_facility,
+        expiredAt: _newExpired
     }
     const updateUser = async (body: {
         password?: string;
@@ -56,11 +58,11 @@ export const DetailUser = ({ user }: Props) => {
     }) => {
         const result = await ApiUpdateItem({ position: _currentUser.position, archive: "user", id: user.id }, body)
         if (result.success) {
-            store.dispatch(setModal({ open: true, msg: "更新成功！", value: "", type: "notificaiton" }))
+            store.dispatch(setModal({ open: true, msg: "更新成功！", value: "", type: "notification" }))
             setTimeout(() => {
                 store.dispatch(setModal({ open: false, msg: "", value: "", type: "" }))
+                store.dispatch(setRefresh())
             }, 3000);
-            store.dispatch(setRefresh())
 
         } else {
             console.log(result.data)
@@ -103,6 +105,22 @@ export const DetailUser = ({ user }: Props) => {
     }, [user])
 
     const [_modalFacility, set_modalFacility] = useState<boolean>(false)
+    const [_extend, set_extend] = useState<string>('0mth')
+
+
+    useEffect(() => {
+        if (!_extend || _extend === "0mth") {
+            set_newExpired(user.expiredAt)
+        }
+        if (_extend === "6mth") {
+            // console.log(moment(user.expiredAt).utc().add(6, 'months').format("YYYY年MM月DD日"))
+            set_newExpired(moment(user.expiredAt).add(6, 'months').toDate())
+        }
+        if (_extend === "12mth") {
+            // console.log(moment(user.expiredAt).utc().add(1, 'years').format("YYYY年MM月DD日"))
+            set_newExpired(moment(user.expiredAt).add(12, 'months').toDate())
+        }
+    }, [_extend, user.expiredAt])
 
     return (
         slug === "news" ?
@@ -156,8 +174,32 @@ export const DetailUser = ({ user }: Props) => {
                         null}
 
                 </div>
+                <div className="h-12"></div>
                 <div>
-
+                    有効期限を延長:
+                </div>
+                {_currentUser.position !== "user" ?
+                    <>
+                        <div className="flex gap-4">
+                            <div >
+                                < input type='radio' className='mr-1' value={"0mth"} checked={_extend === "0mth"} onChange={(e) => set_extend(e.target.value)} ></input>延長なし
+                            </div>
+                            <div >
+                                < input type='radio' className='mr-1' value={"6mth"} checked={_extend === "6mth"} onChange={(e) => set_extend(e.target.value)} ></input>6ヶ月
+                            </div>
+                            <div>
+                                < input type='radio' className='mr-1' value={"12mth"} checked={_extend === "12mth"} onChange={(e) => set_extend(e.target.value)}></input>1年間
+                            </div>
+                        </div>
+                        <div>
+                            作成日: {moment(user.createdAt).utc().format("YYYY年MM月DD日")}
+                        </div>
+                        <div>
+                            有効期限: {moment(_newExpired).utc().format("YYYY年MM月DD日")}
+                        </div>
+                    </> :
+                    null}
+                <div>
                     <Button name="保存" sx='!bg-org-button' disable={!_password && !_facilityLimit} onClick={() => { updateUser(body) }} />
                 </div>
             </div>
@@ -266,7 +308,7 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className='font-bold text-sm'>コンテンツ</div>
+                <div className='font-bold text-sm'>ニュースの内容</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
 
@@ -645,7 +687,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <Input onchange={v => set_video(v)} value={_video} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''></div>
+                <div className=''>施設の紹介をご記入ください</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
 
@@ -1043,12 +1085,8 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <div className=''>掲載日</div>
                 <Input key={moment(_startDate).format("YYYY-MM-DD")} type='date' onchange={v => set_startDate(v)} value={moment(_startDate).format("YYYY-MM-DD")} sx='!w-full !m-0' />
             </div>
-            {/* <div className='mb-2'>
-                <div className=''>掲載終了日</div>
-                <Input key={moment(_endDate).format("YYYY-MM-DD")} type='date' onchange={v => set_endDate(v)} value={moment(_endDate).format("YYYY-MM-DD")} sx='!w-full !m-0' />
-            </div> */}
             <div className='mb-2'>
-                <div className=''>自由記入欄 （求人の内容や、施設の紹介をご記入ください）</div>
+                <div className=''>求人の内容</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
             <div className='bg-white p-2 border border-slate-300 shadow rounded'>
@@ -1264,7 +1302,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 <Input onchange={v => set_contenttitle(v)} value={_contenttitle} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>自由記入欄 （求人の内容や、インタビューの紹介をご記入ください）</div>
+                <div className=''>インタビューの内容</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
             <div className='bg-white p-2 border border-slate-300 shadow rounded'>

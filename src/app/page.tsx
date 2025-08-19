@@ -19,6 +19,7 @@ export default function Home() {
     update()
   }, [])
 
+  const [_warn, set_warn] = useState<string>("")
   const [_post, set_post] = useState<any[]>([])
   const [_facillities, set_facilities] = useState<any[]>([])
   const [_news, set_news] = useState<any[]>([])
@@ -30,6 +31,8 @@ export default function Home() {
       const result = await ApiItemUser({ position, archive, hostId, limit: 5 })
       if (result.success) {
         set_post(result.data)
+      } else {
+        set_warn(result.msg)
       }
 
     }
@@ -44,6 +47,8 @@ export default function Home() {
       const result = await ApiItemUser({ position, archive, hostId, limit: 5 })
       if (result.success) {
         set_facilities(result.data)
+      } else {
+        set_warn(result.msg)
       }
 
     }
@@ -59,6 +64,8 @@ export default function Home() {
       const result = await ApiItemUser({ position, archive, hostId, limit: 5 })
       if (result.success) {
         set_news(result.data)
+      } else {
+        set_warn(result.msg)
       }
 
     }
@@ -73,6 +80,8 @@ export default function Home() {
       const result = await ApiItemUser({ position, archive, hostId, limit: 5 })
       if (result.success) {
         set_interview(result.data)
+      } else {
+        set_warn(result.msg)
       }
 
     }
@@ -91,6 +100,8 @@ export default function Home() {
       <div className="font-bold text-3xl">
         若年層モデル事業就職サイトの管理ページです。
       </div>
+      {_warn ? <div className='text-red-500'>{_warn}<br></br>アカウントを有効にするように、管理者に連絡してください。</div> : null}
+
       {
         _currentUser.position === "user" ?
           <div className="text-left ">
@@ -109,8 +120,8 @@ export default function Home() {
                   <div className="justify-center col-span-2">{p.draft ? "下書き" : "公開済み"}</div>
                   <div className="justify-center col-span-2">{moment(p.createdAt).format("YYYY年MM月DD日")}</div>
                 </div>) :
-                <div className="px-4 grid grid-cols-12 py-2 gap-1"> 求人情報がありません。
-                </div>}
+                <div className="px-4 py-2 gap-1 text-center"> {_warn ? <div className="text-red-500">{_warn}</div> : "求人情報がありません。"}</div>
+              }
             </div>
             <div className="h-12"></div>
             <div className="h-12 justify-center font-bold text-xl px-4">施設</div>
@@ -128,8 +139,8 @@ export default function Home() {
                   <div className="justify-center col-span-2">{f.draft ? "下書き" : "公開済み"}</div>
                   <div className="justify-center col-span-2">{moment(f.createdAt).format("YYYY年MM月DD日")}</div>
                 </div>) :
-                <div className="px-4 grid grid-cols-12 py-2 gap-1"> 施設がありません。
-                </div>}
+                <div className="px-4 py-2 gap-1 text-center"> {_warn ? <div className="text-red-500">{_warn}</div> : "施設がありません。"}</div>
+              }
             </div>
           </div> :
           <div className="text-left ">
@@ -146,8 +157,8 @@ export default function Home() {
                   <div className="justify-center col-span-2">{p.draft ? "下書き" : "公開済み"}</div>
                   <div className="justify-center col-span-2">{moment(p.createdAt).format("YYYY年MM月DD日")}</div>
                 </div>) :
-                <div className="text-center px-4 grid py-2 gap-1"> ニュースがありません。
-                </div>}
+                <div className="px-4 py-2 gap-1 text-center"> {_warn ? <div className="text-red-500">{_warn}</div> : "ニュースがありません。"}</div>
+              }
             </div>
             <div className="h-12 flex flex-col justify-center font-bold text-xl px-4">先輩たちの声</div>
             <div className="bg-white shadow-md rounded-md overflow-hidden">
@@ -164,11 +175,11 @@ export default function Home() {
                   <div className="justify-center col-span-2">{p.draft ? "下書き" : "公開済み"}</div>
                   <div className="justify-center col-span-2">{moment(p.createdAt).format("YYYY年MM月DD日")}</div>
                 </div>) :
-                <div className="text-center px-4 grid py-2 gap-1"> 先輩たちの声がありません。
-                </div>}
+                <div className="px-4 py-2 gap-1 text-center"> {_warn ? <div className="text-red-500">{_warn}</div> : "先輩たちの声がありません。"}</div>
+              }
             </div>
           </div>
       }
-    </div>
+    </div >
   );
 }

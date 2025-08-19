@@ -26,6 +26,7 @@ export const ArchiveCategory = ({ items, event }: CategoryProps) => {
         update()
     }, [])
 
+
     const [_isAddNewCategory, set_isAddNewCategory] = useState<boolean>(false)
     const [_category, set_category] = useState<string>("")
 
@@ -38,7 +39,6 @@ export const ArchiveCategory = ({ items, event }: CategoryProps) => {
                 set_isAddNewCategory(false)
 
             }
-
         }
     }
     const deleteCategory = async (id: number) => {
