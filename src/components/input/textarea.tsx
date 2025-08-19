@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CompositeDecorator, Editor, EditorState } from 'draft-js'
+import { AtomicBlockUtils, CompositeDecorator, Editor, EditorState, Modifier, RichUtils } from 'draft-js'
 import { stateToHTML } from 'draft-js-export-html'
 import { stateFromHTML } from 'draft-js-import-html'
 import React, { useEffect, useRef, useState } from 'react'
-// import AddIcon from '@mui/icons-material/Add';
+import AddIcon from '@mui/icons-material/Add';
 // import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 // import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 // import FormatBoldIcon from '@mui/icons-material/FormatBold';
@@ -90,64 +90,62 @@ const TextArea = ({ value, onchange }: Props) => {
     // const createInlineStyle = (value: any, type: string) => {
     //     set_EditorState(RichUtils.toggleInlineStyle(value, type));
     // }
-    // const createImage = async (editorState: EditorState) => {
-    //     const selection = editorState.getSelection();
-    //     const content = _editorState.getCurrentContent();
-    //     const block = content.getBlockForKey(selection.getStartKey());
-    //     const url = block.getText()
-    //     const contentStateWithEntity = content.createEntity('IMAGE', 'MUTABLE', { src: url });
-    //     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    //     const newEditorState = AtomicBlockUtils.insertAtomicBlock(_editorState, entityKey, ' ');
-    //     set_EditorState(newEditorState);
-    // }
-    // const addAudio = async (url: string) => {
-    //     const content = _editorState.getCurrentContent();
-    //     const contentStateWithEntity = content.createEntity('AUDIO', 'MUTABLE', { src: url });
-    //     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    //     const newEditorState = AtomicBlockUtils.insertAtomicBlock(_editorState, entityKey, ' ');
-    //     set_EditorState(newEditorState);
-    // }
-    // const makeTextRight = async (value: EditorState) => {
-    //     set_EditorState(RichUtils.toggleBlockType(value, 'text-right'));
-    // }
-    // const makeTextCenter = async (value: EditorState) => {
-    //     set_EditorState(RichUtils.toggleBlockType(value, 'text-center'));
-    // }
+    const createImage = async (url: string) => {
+        const content = _editorState.getCurrentContent();
+        const contentStateWithEntity = content.createEntity('IMAGE', 'MUTABLE', { src: url });
+        const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+        const newEditorState = AtomicBlockUtils.insertAtomicBlock(_editorState, entityKey, ' ');
+        set_EditorState(newEditorState);
+    }
+    const createLink = (value: string) => {
+        const content = _editorState.getCurrentContent();
+        const contentStateWithEntity = content.createEntity('LINK', 'MUTABLE', { url: value });
+        const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+        const newContentState = Modifier.applyEntity(
+            contentStateWithEntity,
+            _editorState.getSelection(),
+            entityKey
+        );
+        let newEditorState = EditorState.push(_editorState, newContentState, 'apply-entity');
+        newEditorState = newEditorState.getCurrentInlineStyle().has("UNDERLINE") ? RichUtils.toggleInlineStyle(newEditorState, '') : RichUtils.toggleInlineStyle(newEditorState, 'UNDERLINE');
+        set_EditorState(newEditorState);
+
+    }
 
     const editRef: any = useRef("")
 
-    // function myBlockStyleFn(contentBlock: { getType: () => string; }) {
-    //     const type = contentBlock.getType();
-    //     if (type === 'text-center') {
-    //         return 'text-center';
-    //     }
-    //     if (type === 'text-right') {
-    //         return 'text-right';
-    //     }
-    //     return '';
-    // }
-    // const getCurrentBlockType = (editorState: EditorState) => {
-    //     const selection = editorState.getSelection();
-    //     const content = editorState.getCurrentContent();
-    //     const block = content.getBlockForKey(selection.getStartKey());
-    //     return block.getType(); // Trả về kiểu như 'unstyled', 'header-one', 'blockquote', v.v.
-    // };
-    // const sx = `!h-full !w-full m-auto p-2 font-bold flex flex-col justify-center text-center`
 
-    // const [_toolOpen, set_toolOpen] = useState<boolean>(false)
-    // const [_toolInputOpen, set_toolInputOpen] = useState<boolean>(false)
-    // const [_toolIndex, set_toolIndex] = useState<number>(0)
 
+    const [_toolOpen, set_toolOpen] = useState<boolean>(false)
+    const [_toolIndex, set_toolIndex] = useState<number>(0)
+    const [_url, set_url] = useState<string>("")
+
+    const submit = (index: number, url: string) => {
+        if (index == 1) {
+            createImage(url)
+            set_url("")
+            set_toolIndex(0)
+        }
+        if (index == 2) {
+            createLink(url)
+            set_url("")
+            set_toolIndex(0)
+        }
+    }
     return (
-        <div className=' rounded'>
-            <div className='h-12 sticky top-0 py-1 flex gap-1 z-[1] justify-between'>
-                <div></div>
-                {/* <AddIcon className='!w-10 !h-10 p-1 cursor-pointer' onClick={() => set_toolOpen(!_toolOpen)} /> */}
-                {/* <div className={`${_toolOpen ? "block" : "hidden"} absolute right-1 top-13 h-24 shadow-md bg-white border border-slate-300 rounded-md overflow-hidden`}>
+        <div className=''>
+            <div className='h-12 sticky top-0 py-1 flex gap-1 z-[1] justify-between bg-org-bg'>
+                {_toolIndex ? <div className='flex gap-2'>
+                    <input className='border w-60 border-slate-300 bg-white rounded' onChange={(e) => set_url(e.currentTarget.value)} value={_url}></input>
+                    <div className='w-20 text-center text-sm flex flex-col justify-center rounded bg-org-button text-white' onClick={() => submit(_toolIndex, _url)}>追加</div>
+                    <div className='w-20 text-center text-sm flex flex-col justify-center rounded border text-org-button' onClick={() => { set_toolOpen(false); set_toolIndex(0) }}>キャンセル</div>
+                </div> : <div></div>}
+                <AddIcon className='!w-10 !h-10 p-1 cursor-pointer' onClick={() => set_toolOpen(!_toolOpen)} />
+                <div className={`${_toolOpen ? "block" : "hidden"} absolute right-1 top-13 h-24 shadow-md bg-white border border-slate-300 rounded-md overflow-hidden`}>
                     <div className="h-12 px-4 flex flex-col justify-center hover:bg-slate-100 cursor-pointer" onClick={() => { set_toolIndex(1); set_toolOpen(false) }}>画像を追加</div>
                     <div className="h-[1px] w-full bg-slate-300"></div>
                     <div className="h-12 px-4 flex flex-col justify-center hover:bg-slate-100 cursor-pointer" onClick={() => { set_toolIndex(2); set_toolOpen(false) }}>リンクを追加</div>
-                </div> */}
+                </div>
             </div>
 
             <div className='dangerous_box border bg-white border-slate-300 min-h-96 p-4 overflow-x-auto scroll_none cursor-text text-justify text-sm md:text-base' onClick={() => editRef.current.focus()}>
