@@ -621,18 +621,18 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <Input onchange={v => set_homepage(v)} value={_homepage} sx='!w-full !m-0' />
             </div>
             <div className='mb-2 relative' onMouseLeave={() => set_isHover2(false)}>
-                <div className=''>Google MapsのURL
-                    <span className='text-sm opacity-50 hover:underline cursor-pointer' onMouseEnter={() => set_isHover2(true)}>埋め込みかた</span>
-                    <div className={`absolute top-[50%] left-[5%] h-(--xs) w-11/12 max-w-(--xs) bg-white z-1 ${_isHover2 ? "block" : "hidden"} shadow border-2 border-org-button rounded-md`} onMouseLeave={() => set_isHover2(false)}>
-                        <Image src={"/gif/tips_googlemaps.gif"} fill className='object-cover' alt='gif' />
+                <div className='flex gap-2'>Google MapsのURL
+                    <span className='text-sm opacity-50 hover:underline cursor-pointer border font-bold w-8 flex flex-col justify-center text-center rounded-3xl' onMouseEnter={() => set_isHover2(true)}>?</span>
+                    <div className={`absolute top-[50%] left-[5%] h-max w-11/12  bg-white z-1 ${_isHover2 ? "block" : "hidden"} shadow border-2 border-org-button rounded-md`} onMouseLeave={() => set_isHover2(false)}>
+                        <Image src={"/gif/tips_googlemaps.gif"} width={500} height={500} className='w-full' alt='gif' />
                     </div></div>
                 <Input onchange={v => set_map(v)} value={_map} sx='!w-full !m-0' />
             </div>
             <div className='mb-2 relative' onMouseLeave={() => set_isHover1(false)}>
-                <div className=''>紹介動画 YouTube URL
-                    <span className='text-sm opacity-50 hover:underline cursor-pointer' onMouseEnter={() => set_isHover1(true)}>埋め込みかた</span>
-                    <div className={`absolute top-[50%] left-[5%] h-(--xs) w-11/12 max-w-(--xs) bg-white z-1 ${_isHover1 ? "block" : "hidden"} shadow border-2 border-org-button rounded-md`} onMouseLeave={() => set_isHover1(false)}>
-                        <Image src={"/gif/sample.gif"} fill className='object-cover' alt='gif' />
+                <div className='flex gap-2'>紹介動画 YouTube URL
+                    <span className='text-sm opacity-50 hover:underline cursor-pointer border font-bold w-8 flex flex-col justify-center text-center rounded-3xl' onMouseEnter={() => set_isHover1(true)}>?</span>
+                    <div className={`absolute top-[50%] left-[5%] h-max w-11/12 bg-white z-1 ${_isHover1 ? "block" : "hidden"} shadow border-2 border-org-button rounded-md`} onMouseLeave={() => set_isHover1(false)}>
+                        <Image src={"/gif/sample.gif"} width={500} height={500} className=' w-full ' alt='gif' />
                     </div>
                 </div>
                 <Input onchange={v => set_video(v)} value={_video} sx='!w-full !m-0' />
@@ -1134,7 +1134,8 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
         } else {
             set_slug("interview_" + moment(new Date).format("YYYY_MM_DD_hh_mm_ss"))
         }
-    }, [item])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const body = {
         name: _name,
@@ -1275,7 +1276,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; await updateItem(3, body); window.open(process.env.home_url + "/interview/_preview?archivePlus=interview_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; await updateItem(3, newBody); window.open(process.env.home_url + "/interview/_preview?archivePlus=interview_preview", "_blank") }} />
 
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
