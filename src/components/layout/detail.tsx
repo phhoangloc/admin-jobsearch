@@ -1026,19 +1026,19 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                         )}
                     </select>
                 </div>
-                <div className='text-sm px-2 opacity-50'>その他</div>
+                <div className='text-sm px-2 opacity-50'>選択肢以外の職種は下記に入力してください</div>
                 <Input onchange={v => { set_worktype(v) }} value={_worktype} sx='!w-full !m-0' />
                 <div className="h-2"></div>
             </div>
             <div className='mb-2'>
                 <div className=''>タグ</div>
-                <Input onchange={v => set_worktag(v)} value={_worktag.map(t => t.name).toString()} sx='!w-full !m-0' disable />
                 <div className='flex gap-2 mt-2 flex-wrap'>
                     {_tag.map((tag, index) =>
                         <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer ${_worktag.map(t => t.id).includes(tag.id) ? "bg-org-button/25" : "bg-org-button/5"}`} key={index} onClick={() => set_worktag(crr => crr.map(t => t.id).includes(tag.id) ? crr.filter(cr => cr.id !== tag.id) : [...crr, tag])}>{tag.name}</div>
                     )}
                     <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer bg-org-button/5 font-bold`} onClick={() => set_openTagModal(true)}>+</div>
                 </div>
+                <Input onchange={v => set_worktag(v)} value={_worktag.map(t => t.name).toString()} sx='!w-full !m-0' disable />
             </div>
             <div className='mb-2'>
                 <div className=''>雇用形態</div>
@@ -1050,7 +1050,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                         )}
                     </select>
                 </div>
-                <div className='text-sm px-2 opacity-50'>その他</div>
+                <div className='text-sm px-2 opacity-50'>選択肢以外の雇用形態は下記に入力してください</div>
                 <Input onchange={v => set_workstatus(v)} value={_workstatus} sx='!w-full !m-0' />
                 <div className="h-2"></div>
 
@@ -1065,12 +1065,12 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                         )}
                     </select>
                 </div>
-                <div className='text-sm px-2 opacity-50'>その他</div>
+                <div className='text-sm px-2 opacity-50'>選択肢以外の資格は下記に入力してください</div>
                 <Input onchange={v => set_lisense(v)} value={_lisense} sx='!w-full !m-0' />
                 <div className="h-2"></div>
             </div>
             <div className='mb-2'>
-                <div className=''>通勤時間</div>
+                <div className=''>義務時間</div>
                 <Input onchange={v => set_worktime(v)} value={_worktime} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
@@ -1082,7 +1082,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <Input onchange={v => set_bonus(v)} value={_bonus} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>福利福利厚生（自由にご記入ください）厚生</div>
+                <div className=''>福利厚生（自由にご記入ください）</div>
                 <textarea onChange={e => set_workbenefit(e.currentTarget.value)} value={_workbenefit} className='!w-full !m-0 border border-slate-300 rounded h-36 bg-white p-2' />
             </div>
             <div className='mb-2'>
@@ -1098,7 +1098,6 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                     <div className='h-full flex flex-col justify-center'>状態 : </div>
                     <div className='col-span-1 bg-white h-12 border  rounded active:outline-0 border-slate-300 w-20'>
                         <select onChange={(e) => set_draft(e.target.value === "1" ? true : false)} value={_draft ? 1 : 0} className='pt-2 w-full flex flex-col justify-center h-full'>
-                            {/* <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option> */}
                             {[{ name: "下書き", value: 1 }, { name: "公開", value: 0 }].map((item, index) =>
                                 <option className='text-black' key={index} value={item.value} >{item.name}</option>
                             )}
