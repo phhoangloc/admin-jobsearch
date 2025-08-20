@@ -18,7 +18,7 @@ const NotificationModal = ({ type, msg, open }: Props) => {
   switch (type) {
     case "notification":
       return (
-        <div className={`absolute top-4 right-4 bg-sky-900 text-white text-sm py-1 px-4 rounded-3xl transition-all duration-300 shadow-xl ${_translate ? "translate-x-[0%]" : "translate-x-[200%]"} `}>
+        <div className={`absolute top-4 right-4 bg-sky-900 text-white z-10 text-sm py-1 px-4 rounded-3xl transition-all duration-300 shadow-xl ${_translate ? "translate-x-[0%]" : "translate-x-[200%]"} `}>
           {msg}
         </div>
       )

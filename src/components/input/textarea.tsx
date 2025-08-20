@@ -3,16 +3,22 @@ import { AtomicBlockUtils, CompositeDecorator, Editor, EditorState, Modifier, Ri
 import { stateToHTML } from 'draft-js-export-html'
 import { stateFromHTML } from 'draft-js-import-html'
 import React, { useEffect, useRef, useState } from 'react'
-import AddIcon from '@mui/icons-material/Add';
+// import ImageIcon from '@mui/icons-material/Image';
 // import FormatAlignCenterIcon from '@mui/icons-material/FormatAlignCenter';
 // import FormatAlignRightIcon from '@mui/icons-material/FormatAlignRight';
 // import FormatBoldIcon from '@mui/icons-material/FormatBold';
 // import FormatItalicIcon from '@mui/icons-material/FormatItalic';
 // import PlaylistAddCircleIcon from '@mui/icons-material/PlaylistAddCircle';
+import UploadIcon from '@mui/icons-material/Upload';
+import { ApiUploadFile } from '@/api/user';
+import { UserType } from '@/redux/reducer/UserReduce';
+import store from '@/redux/store';
+import { setModal } from '@/redux/reducer/ModalReduce';
+import { UploadButton } from '../button/button';
 type Props = {
     value: string,
     onchange: (v: string) => void,
-    picButton?: boolean
+    tool?: boolean
 }
 const Image = (props: any) => {
     const { src } = props.contentState.getEntity(props.entityKey).getData();
@@ -22,6 +28,12 @@ const Image = (props: any) => {
 const Audio = (props: any) => {
     const { src } = props.contentState.getEntity(props.entityKey).getData();
     return <audio controls src={src} className='w-full' />;
+};
+const Link = (props: any) => {
+    const { url } = props.contentState.getEntity(props.entityKey).getData();
+    return <a href={url} style={{ textDecoration: "underline" }} target="_blank" rel="noreferrer">
+        {props.children}
+    </a>
 };
 const decorator = new CompositeDecorator([
     {
@@ -45,10 +57,31 @@ const decorator = new CompositeDecorator([
             }, callback);
         },
         component: Audio,
-    }
+    },
+    {
+        strategy: (contentBlock, callback, contentState) => {
+            contentBlock.findEntityRanges((character) => {
+                const entityKey = character.getEntity();
+                return (
+                    entityKey !== null && contentState.getEntity(entityKey).getType() === 'LINK'
+                );
+            }, callback);
+        }, component: Link,
+    },
 ]);
 
-const TextArea = ({ value, onchange }: Props) => {
+const TextArea = ({ value, onchange, tool }: Props) => {
+
+    const [_currentUser, set_currentUser] = useState<UserType>(store.getState().user)
+
+    const update = () => {
+        store.subscribe(() => set_currentUser(store.getState().user))
+    }
+
+    useEffect(() => {
+        update()
+    }, [])
+
 
     const [_outPut, set_outPut] = useState<string>("")
     const [_editorState, set_EditorState] = useState(EditorState.createEmpty(decorator));
@@ -83,13 +116,6 @@ const TextArea = ({ value, onchange }: Props) => {
     useEffect(() => {
         onchange(_outPut)
     }, [_outPut, onchange])
-
-    // const createBlockStyle = (value: EditorState, type: string) => {
-    //     set_EditorState(RichUtils.toggleBlockType(value, type));
-    // }
-    // const createInlineStyle = (value: any, type: string) => {
-    //     set_EditorState(RichUtils.toggleInlineStyle(value, type));
-    // }
     const createImage = async (url: string) => {
         const content = _editorState.getCurrentContent();
         const contentStateWithEntity = content.createEntity('IMAGE', 'MUTABLE', { src: url });
@@ -97,63 +123,95 @@ const TextArea = ({ value, onchange }: Props) => {
         const newEditorState = AtomicBlockUtils.insertAtomicBlock(_editorState, entityKey, ' ');
         set_EditorState(newEditorState);
     }
-    const createLink = (value: string) => {
-        const content = _editorState.getCurrentContent();
-        const contentStateWithEntity = content.createEntity('LINK', 'MUTABLE', { url: value });
-        const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-        const newContentState = Modifier.applyEntity(
-            contentStateWithEntity,
-            _editorState.getSelection(),
-            entityKey
-        );
-        let newEditorState = EditorState.push(_editorState, newContentState, 'apply-entity');
-        newEditorState = newEditorState.getCurrentInlineStyle().has("UNDERLINE") ? RichUtils.toggleInlineStyle(newEditorState, '') : RichUtils.toggleInlineStyle(newEditorState, 'UNDERLINE');
-        set_EditorState(newEditorState);
+
+    const getFile = async (e: any) => {
+        const files = e.target.files;
+        const file: File | undefined = files ? files[0] : undefined
+        const reader: FileReader = new FileReader();
+        if (file) {
+            reader.readAsDataURL(file);
+            reader.onloadend = async function () {
+                const result = await ApiUploadFile({ position: _currentUser.position, archive: "file", file })
+                if (result.success) {
+                    store.dispatch(setModal({ open: true, value: "", msg: "作成成功！", type: "notification" }))
+                    createImage(process.env.ftp_url + result.data.name)
+                    setTimeout(() => {
+                        store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                    }, 3000);
+                } else {
+                    console.log(result.data)
+                    store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
+                    setTimeout(() => {
+                        store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                    }, 3000);
+                }
+            }
+        }
 
     }
+
+
 
     const editRef: any = useRef("")
 
+    const toggleHighlight = () => {
+        set_EditorState(
+            RichUtils.toggleInlineStyle(_editorState, "HIGHLIGHT")
+        );
+    };
 
-
-    const [_toolOpen, set_toolOpen] = useState<boolean>(false)
-    const [_toolIndex, set_toolIndex] = useState<number>(0)
+    const [_isAddLink, set_IsAddLink] = useState<boolean>(false)
     const [_url, set_url] = useState<string>("")
 
-    const submit = (index: number, url: string) => {
-        if (index == 1) {
-            createImage(url)
+    const addLink = (url: string) => {
+        const selection = _editorState.getSelection();
+        if (!selection.isCollapsed()) {
+
+
+            const contentState = _editorState.getCurrentContent();
+            const contentStateWithEntity = contentState.createEntity("LINK", "MUTABLE", {
+                url,
+            });
+            const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+
+            const contentStateWithLink = Modifier.applyEntity(
+                contentStateWithEntity,
+                selection,
+                entityKey
+            );
+
+            set_EditorState(
+                EditorState.push(_editorState, contentStateWithLink, "apply-entity")
+            );
             set_url("")
-            set_toolIndex(0)
-        }
-        if (index == 2) {
-            createLink(url)
-            set_url("")
-            set_toolIndex(0)
+            set_IsAddLink(false)
+            toggleHighlight()
         }
     }
+
     return (
-        <div className=''>
-            <div className='h-12 sticky top-0 py-1 flex gap-1 z-[1] justify-between bg-org-bg'>
-                {_toolIndex ? <div className='flex gap-2'>
-                    <input className='border w-60 border-slate-300 bg-white rounded' onChange={(e) => set_url(e.currentTarget.value)} value={_url}></input>
-                    <div className='w-20 text-center text-sm flex flex-col justify-center rounded bg-org-button text-white' onClick={() => submit(_toolIndex, _url)}>追加</div>
-                    <div className='w-20 text-center text-sm flex flex-col justify-center rounded border text-org-button' onClick={() => { set_toolOpen(false); set_toolIndex(0) }}>キャンセル</div>
-                </div> : <div></div>}
-                <AddIcon className='!w-10 !h-10 p-1 cursor-pointer' onClick={() => set_toolOpen(!_toolOpen)} />
-                <div className={`${_toolOpen ? "block" : "hidden"} absolute right-1 top-13 h-24 shadow-md bg-white border border-slate-300 rounded-md overflow-hidden`}>
-                    <div className="h-12 px-4 flex flex-col justify-center hover:bg-slate-100 cursor-pointer" onClick={() => { set_toolIndex(1); set_toolOpen(false) }}>画像を追加</div>
-                    <div className="h-[1px] w-full bg-slate-300"></div>
-                    <div className="h-12 px-4 flex flex-col justify-center hover:bg-slate-100 cursor-pointer" onClick={() => { set_toolIndex(2); set_toolOpen(false) }}>リンクを追加</div>
-                </div>
-            </div>
+        <div className=' rounded'>
+            {tool ?
+                <div className='h-12 sticky top-0 py-1 flex gap-1 bg-org-bg'>
+                    <UploadButton onClick={(e) => getFile(e)} name={<div className='border rounded-3xl py-1 px-4 bg-white cursor-pointer'><UploadIcon /> ファイルをアップロード</div>} />
+                    {_isAddLink ?
+                        <div className='flex gap-2'>
+                            <input className='border w-60 border-slate-300 bg-white rounded' onChange={(e) => set_url(e.currentTarget.value)} value={_url}></input>
+                            <div className='w-20 text-center text-sm flex flex-col justify-center rounded-3xl  border text-org-button' onClick={() => { set_IsAddLink(false); toggleHighlight() }}>キャンセル</div>
+                            <div className='w-20 text-center text-sm flex flex-col justify-center rounded-3xl  bg-org-button text-white' onClick={() => addLink(_url)}>追加</div>
+                        </div> :
+                        <div className='border rounded-3xl py-1 px-4 bg-white cursor-pointer' onClick={() => { set_IsAddLink(true); toggleHighlight() }}> リンクを設定</div>
+                    }
+                </div> :
+                null}
 
             <div className='dangerous_box border bg-white border-slate-300 min-h-96 p-4 overflow-x-auto scroll_none cursor-text text-justify text-sm md:text-base' onClick={() => editRef.current.focus()}>
-                <Editor ref={editRef} editorState={_editorState} onChange={(editorState) => set_EditorState(editorState)} />
+                <Editor ref={editRef} editorState={_editorState} onChange={(editorState) => set_EditorState(editorState)} customStyleMap={{
+                    HIGHLIGHT: { backgroundColor: "#ddd", color: "black" },
+                }} />
             </div>
         </div>
     )
 }
 
 export default TextArea
-

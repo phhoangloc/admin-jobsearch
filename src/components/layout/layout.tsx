@@ -21,7 +21,7 @@ const Layout = ({ children }: Props) => {
         update()
     }, [])
     return (
-        <div className='w-full max-w-(--xl) m-auto overflow-hidden'>
+        <div className='w-full max-w-(--xl) m-auto overflow-hidden z-0'>
             <div className="w-full flex h-(--vh-24)">
                 <div className={`w-0 overflow-hidden transition-all duration-500  ${_currentMenu ? "w-40" : "w-0 md:w-6 lg:w-40"}`}>
                     <Sidebar />

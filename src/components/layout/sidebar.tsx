@@ -4,7 +4,6 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonIcon from '@mui/icons-material/Person';
 import { useRouter } from 'next/navigation';
 import ArticleIcon from '@mui/icons-material/Article';
-import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
 import ApartmentIcon from '@mui/icons-material/Apartment';
 import InterpreterModeIcon from '@mui/icons-material/InterpreterMode';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -72,12 +71,6 @@ const Sidebar = () => {
             name: "新規インタビュー",
             link: "/interview/news"
         }],
-        limit: "user"
-    },
-    {
-        icon: <InsertPhotoIcon className='h-7 w-7 my-auto text-org-button' />,
-        name: "写真",
-        link: "/file",
         limit: "user"
     },
     {

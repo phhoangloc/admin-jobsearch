@@ -707,7 +707,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(84, body); window.open(process.env.home_url + "/facility/_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(84, body); window.open(process.env.home_url + "/facility/_preview?archivePlus=facility_preview", "_blank") }} />
 
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
@@ -987,17 +987,17 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
-                <div className='w-max flex justify-between'>
-                    <UploadButton name={<div className='border rounded-3xl py-1 px-4 bg-white'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
+                <div className='w-max flex justify-between mb-2'>
+                    <UploadButton name={<div className='border rounded-3xl py-1 px-4 bg-white cursor-pointer'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>
                 {
                     _imagePreview ?
-                        <div className='w-full max-w-(--xs)'>
-                            <ClearIcon className='!w-12 !h-12 p-2 cursor-pointer text-red-500 !block ml-auto mr-0' onClick={() => {
+                        <div className='w-full max-w-(--xs) relative'>
+                            <Image src={_imagePreview} width="500" height="500" className='w-full' alt='img' />
+                            <ClearIcon className='!w-10 !h-10 p-1 cursor-pointer text-red-500 absolute bottom-1 right-1 bg-white rounded-md' onClick={() => {
                                 set_imageId(4)
                                 set_imagePreview("")
                             }} />
-                            <Image src={_imagePreview} width="500" height="500" className='w-full' alt='img' />
                         </div>
                         : null
                 }
@@ -1091,7 +1091,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>求人の内容</div>
-                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
+                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} tool={true} />
             </div>
             <div className='bg-white p-2 border border-slate-300 shadow rounded'>
                 <div className='mb-2 flex h-12 gap-2 my-2'>
@@ -1107,7 +1107,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(7, body); window.open(process.env.home_url + "/post/_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(7, body); window.open(process.env.home_url + "/post/_preview?archivePlus=post_preview", "_blank") }} />
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
                         <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
@@ -1310,7 +1310,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>インタビューの内容</div>
-                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} picButton={true} />
+                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
             <div className='bg-white p-2 border border-slate-300 shadow rounded'>
                 <div className='mb-2 flex h-12 gap-2 my-2'>
@@ -1326,7 +1326,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(3, body); window.open(process.env.home_url + "/interview/_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(3, body); window.open(process.env.home_url + "/interview/_preview?archivePlus=interview_preview", "_blank") }} />
 
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
