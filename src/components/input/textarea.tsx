@@ -179,16 +179,17 @@ const TextArea = ({ value, onchange, tool }: Props) => {
                 selection,
                 entityKey
             );
-
-            set_EditorState(
-                EditorState.push(_editorState, contentStateWithLink, "apply-entity")
-            );
+            set_EditorState(EditorState.push(_editorState, contentStateWithLink, "apply-entity"));
             set_url("")
             set_IsAddLink(false)
-            toggleHighlight()
         }
     }
-
+    useEffect(() => {
+        if (_isAddLink === false) {
+            toggleHighlight()
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [_isAddLink])
     return (
         <div className=' rounded'>
             {tool ?

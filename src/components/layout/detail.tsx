@@ -372,14 +372,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
     const [_location, set_location] = useState<string>("")
     const [_area, set_area] = useState<string>("")
     const [_phone, set_phone] = useState<string>("")
-    const [_phoneWarn, set_phoneWarn] = useState<string>("")
-    const [_phoneView, set_phoneView] = useState<string>("")
-    const [_phoneKey, set_phoneKey] = useState<number>(0)
-
     const [_fax, set_fax] = useState<string>("")
-    const [_faxWarn, set_faxWarn] = useState<string>("")
-    const [_faxView, set_faxView] = useState<string>("")
-    const [_faxKey, set_faxKey] = useState<number>(0)
     const [_email, set_email] = useState<string>("")
     const [_emailWarn, set_emailwarn] = useState<string>("")
     const [_homepage, set_homepage] = useState<string>("")
@@ -390,7 +383,6 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
 
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
-
 
     useEffect(() => {
         if (item) {
@@ -532,51 +524,6 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
             return ""
         }
     }
-    const formatPhoneNumber = (input: string) => {
-        if (input) {
-            const digits = input.replace(/\D/g, '');
-
-            if (digits.length === 10) {
-                set_phoneWarn("")
-                set_phoneKey(k => k + 1)
-
-                return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-            } else if (digits.length === 11) {
-                set_phoneWarn("")
-                set_phoneKey(k => k + 1)
-                return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-            } else {
-                set_phoneWarn("電話番号は適切ではありません")
-                return input;
-            }
-        } else {
-            set_phoneWarn("")
-            return ""
-        }
-    }
-    const formatFaxNumber = (input: string) => {
-        if (input) {
-            const digits = input.replace(/\D/g, '');
-
-            if (digits.length === 10) {
-                set_faxWarn("")
-                set_faxKey(k => k + 1)
-
-                return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-            } else if (digits.length === 11) {
-                set_faxWarn("")
-                set_faxKey(k => k + 1)
-
-                return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-            } else {
-                set_faxWarn("ファクスは適切ではありません")
-                return input;
-            }
-        } else {
-            set_faxWarn("")
-            return ""
-        }
-    }
     const getAddressFacility = async (pNo: string) => {
         const result = await getAddress(pNo)
         if (result.results?.length) {
@@ -600,12 +547,6 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
         set_postno(formatPostNo(digits))
     }, [_postno])
     useEffect(() => {
-        set_phoneView(formatPhoneNumber(_phone))
-    }, [_phone])
-    useEffect(() => {
-        set_faxView(formatFaxNumber(_fax))
-    }, [_fax])
-    useEffect(() => {
         formatArea(_location)
     }, [_location])
     useEffect(() => {
@@ -613,6 +554,8 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
     }, [_email])
 
     const toPage = useRouter()
+    const [_isHover1, set_isHover1] = useState<boolean>(false)
+    const [_isHover2, set_isHover2] = useState<boolean>(false)
 
 
     return (
@@ -662,14 +605,11 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>電話番号 <span className='text-sm text-red-500'>必須</span></div>
-                <Input key={_phoneKey} onchange={v => set_phone(v)} value={_phoneView} sx='!w-full !m-0' />
-                <p className='text-red-500 text-xs'>{_phoneWarn}</p>
-
+                <Input onchange={v => set_phone(v)} value={_phone} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
                 <div className=''>FAX</div>
-                <Input key={_faxKey} onchange={v => set_fax(v)} value={_faxView} sx='!w-full !m-0' />
-                <p className='text-red-500 text-xs'>{_faxWarn}</p>
+                <Input onchange={v => set_fax(v)} value={_fax} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
                 <div className=''>Email</div>
@@ -680,12 +620,21 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <div className=''>ウェブサイト</div>
                 <Input onchange={v => set_homepage(v)} value={_homepage} sx='!w-full !m-0' />
             </div>
-            <div className='mb-2'>
-                <div className=''>Google MapsのURL</div>
+            <div className='mb-2 relative' onMouseLeave={() => set_isHover2(false)}>
+                <div className=''>Google MapsのURL
+                    <span className='text-sm opacity-50 hover:underline cursor-pointer' onMouseEnter={() => set_isHover2(true)}>埋め込みかた</span>
+                    <div className={`absolute top-[50%] left-[5%] h-(--xs) w-11/12 max-w-(--xs) bg-white z-1 ${_isHover2 ? "block" : "hidden"} shadow border-2 border-org-button rounded-md`} onMouseLeave={() => set_isHover2(false)}>
+                        <Image src={"/gif/tips_googlemaps.gif"} fill className='object-cover' alt='gif' />
+                    </div></div>
                 <Input onchange={v => set_map(v)} value={_map} sx='!w-full !m-0' />
             </div>
-            <div className='mb-2'>
-                <div className=''>紹介動画 YouTube URL</div>
+            <div className='mb-2 relative' onMouseLeave={() => set_isHover1(false)}>
+                <div className=''>紹介動画 YouTube URL
+                    <span className='text-sm opacity-50 hover:underline cursor-pointer' onMouseEnter={() => set_isHover1(true)}>埋め込みかた</span>
+                    <div className={`absolute top-[50%] left-[5%] h-(--xs) w-11/12 max-w-(--xs) bg-white z-1 ${_isHover1 ? "block" : "hidden"} shadow border-2 border-org-button rounded-md`} onMouseLeave={() => set_isHover1(false)}>
+                        <Image src={"/gif/sample.gif"} fill className='object-cover' alt='gif' />
+                    </div>
+                </div>
                 <Input onchange={v => set_video(v)} value={_video} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
@@ -707,7 +656,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(84, body); window.open(process.env.home_url + "/facility/_preview?archivePlus=facility_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; newBody.draft = false; await updateItem(84, newBody); window.open(process.env.home_url + "/facility/_preview?archivePlus=facility_preview", "_blank") }} />
 
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
@@ -850,6 +799,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateItem = async (id: number, body: any) => {
+        console.log(body)
         const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id }, body)
         if (result.success) {
             store.dispatch(setModal({ open: true, value: "", msg: "更新成功！", type: "notification" }))
@@ -1106,7 +1056,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(7, body); window.open(process.env.home_url + "/post/_preview?archivePlus=post_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; newBody.draft = false; await updateItem(7, newBody); window.open(process.env.home_url + "/post/_preview?archivePlus=post_preview", "_blank") }} />
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
                         <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
@@ -1325,7 +1275,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = body; newBody.slug = "_preview"; await updateItem(3, body); window.open(process.env.home_url + "/interview/_preview?archivePlus=interview_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; await updateItem(3, body); window.open(process.env.home_url + "/interview/_preview?archivePlus=interview_preview", "_blank") }} />
 
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
