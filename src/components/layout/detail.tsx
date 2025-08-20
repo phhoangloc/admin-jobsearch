@@ -1032,7 +1032,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>タグ</div>
-                <div className='flex gap-2 mt-2 flex-wrap'>
+                <div className='flex gap-2 mb-2 flex-wrap'>
                     {_tag.map((tag, index) =>
                         <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer ${_worktag.map(t => t.id).includes(tag.id) ? "bg-org-button/25" : "bg-org-button/5"}`} key={index} onClick={() => set_worktag(crr => crr.map(t => t.id).includes(tag.id) ? crr.filter(cr => cr.id !== tag.id) : [...crr, tag])}>{tag.name}</div>
                     )}
