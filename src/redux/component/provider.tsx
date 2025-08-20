@@ -53,8 +53,8 @@ const Provider = ({ children }: Props) => {
             _currentUser.id ? children :
                 <div className="flex flex-col justify-center min-h-screen">
                     <Modal />
+                    <p className='text-center opacity-75'>手話を活かして働く 手話で繋がるポータルサイト</p>
                     <LoginCard />
-                    <p className='text-center opacity-75'>手話を活かして働く 手話で繋がるポータルサイト に統一</p>
                 </div>
     )
 }
