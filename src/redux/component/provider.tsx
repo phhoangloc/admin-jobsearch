@@ -54,7 +54,7 @@ const Provider = ({ children }: Props) => {
                 <div className="flex flex-col justify-center min-h-screen">
                     <Modal />
                     <LoginCard />
-                    <p className='text-center opacity-75'>若年層モデル事業就職サイトの管理ページ</p>
+                    <p className='text-center opacity-75'>手話を活かして働く 手話で繋がるポータルサイト に統一</p>
                 </div>
     )
 }
