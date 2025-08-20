@@ -1070,7 +1070,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <div className="h-2"></div>
             </div>
             <div className='mb-2'>
-                <div className=''>義務時間</div>
+                <div className=''>勤務時間</div>
                 <Input onchange={v => set_worktime(v)} value={_worktime} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
