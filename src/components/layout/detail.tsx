@@ -690,7 +690,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>施設の紹介をご記入ください</div>
-                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
+                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} tool={true} />
             </div>
 
             <div className='bg-white p-2 border border-slate-300 shadow rounded'>
@@ -1310,7 +1310,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
             </div>
             <div className='mb-2'>
                 <div className=''>インタビューの内容</div>
-                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
+                <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} tool={true} />
             </div>
             <div className='bg-white p-2 border border-slate-300 shadow rounded'>
                 <div className='mb-2 flex h-12 gap-2 my-2'>
