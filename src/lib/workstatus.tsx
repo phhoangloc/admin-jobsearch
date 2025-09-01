@@ -1,6 +1,6 @@
 export const worktypeList = [
     {
-        name: " 手話通訳業務",
+        name: "手話通訳業務",
     },
     {
         name: "高齢者介護",
@@ -17,10 +17,10 @@ export const worktypeList = [
 ]
 export const workstatusList = [
     {
-        name: " 常勤",
+        name: "常勤",
     },
     {
-        name: "非常勤",
+        name: "常勤",
     },
 ]
 export const licenseList = [

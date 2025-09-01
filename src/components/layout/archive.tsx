@@ -101,12 +101,13 @@ export const Archive = ({ items, allItemCount, event, archive }: Props) => {
                 store.dispatch(setModal({ open: true, value: "", msg: "削除成功！", type: "notification" }))
                 setTimeout(() => {
                     store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                    if (event) {
+                        event()
+                    }
                 }, 3000);
-                if (event) {
-                    event()
-                }
+
             } else {
-                console.log(result.data)
+
                 store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
 
                 setTimeout(() => {

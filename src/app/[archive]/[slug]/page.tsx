@@ -59,6 +59,8 @@ const Page = () => {
         }
     }, [_currentUser, _currentUser.position, archive, slug, _refresh])
 
+
+
     return (
         <div className='p-2'>
             <div className=" bg-whitefont-bold uppercase h-24 flex flex-col justify-center text-center text-3xl">

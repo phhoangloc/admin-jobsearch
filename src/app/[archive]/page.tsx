@@ -26,38 +26,40 @@ const Page = () => {
     const [_view_items, set_view_items] = useState<any[]>([])
     const [_refresh, set_refresh] = useState<number>(0)
     const [_page, set_page] = useState<number>(0)
-    const getItems = async (position: string, archive: string, hostId: string, page: number, limit: number) => {
-        const result = await ApiItemUser({ position, archive, hostId, skip: page * limit, limit })
-        if (result.success) {
-            set_items(result.data)
-        } else {
-            set_warn(result.msg)
-        }
-    }
-
     useEffect(() => {
+
+
+        const getItems = async (position: string, archive: string, page: number, limit: number) => {
+            const result = await ApiItemUser({ position, archive, skip: page * limit, limit })
+            if (result.success) {
+                set_items(result.data)
+            } else {
+                set_warn(result.msg)
+            }
+        }
+
         if (_currentUser && _currentUser.id) {
-            getItems(_currentUser.position, archive, _currentUser.id.toString(), _page, 20)
+            getItems(_currentUser.position, archive, _page, 20)
         }
     }, [_currentUser, _currentUser.position, archive, _page, _refresh])
 
     useEffect(() => {
         set_view_items(arr => [...arr, ..._items].filter((obj, index, self) => index === self.findIndex((o) => JSON.stringify(o) === JSON.stringify(obj))))
-    }, [_items, _refresh])
+    }, [_items])
 
     const [_allItemCount, set_allItemCount] = useState<number>(0)
 
-    const getAllItems = async (position: string, archive: string, hostId: string,) => {
-        const result = await ApiItemUser({ position, archive, hostId, })
-        if (result.success) {
-            set_allItemCount(result.data.length)
-        }
-    }
     useEffect(() => {
-        if (archive) {
-            getAllItems(_currentUser.position, archive, _currentUser.id.toString())
+        const getAllItems = async (position: string, archive: string,) => {
+            const result = await ApiItemUser({ position, archive, })
+            if (result.success) {
+                set_allItemCount(result.data.length)
+            }
         }
-    }, [_currentUser.id, _currentUser.position, archive])
+        if (archive) {
+            getAllItems(_currentUser.position, archive)
+        }
+    }, [_currentUser.id, _currentUser.position, archive, _refresh])
 
     return (
         <div className=''>
@@ -72,7 +74,7 @@ const Page = () => {
             }
             {
                 archive !== "category" && archive !== "file" ?
-                    <Archive items={_view_items} event={() => set_refresh(n => n + 1)} archive={archive} allItemCount={_allItemCount} />
+                    <Archive items={_view_items} event={() => { set_view_items([]); set_refresh(n => n + 1) }} archive={archive} allItemCount={_allItemCount} />
                     : null
             }
             {_view_items.length < _allItemCount ? <div className='flex flex-col justify-end h-12 text-center text-sm hover:underline cursor-pointer' onClick={() => set_page(n => n + 1)}>もっとみる</div> : null}

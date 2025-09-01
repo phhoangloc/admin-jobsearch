@@ -41,6 +41,7 @@ export const DetailUser = ({ user }: Props) => {
     const [_edit_facility, set_edit_facility] = useState<number[]>([])
     const [_edit_facility_name, set_edit_facility_name] = useState<string[]>([])
     const [_newExpired, set_newExpired] = useState<Date>()
+    const [_startAt, set_startAt] = useState<Date>()
 
     const body = {
         username: _username || user.username,
@@ -49,7 +50,8 @@ export const DetailUser = ({ user }: Props) => {
         facilitieslimit: Number(_facilityLimit) || user.facilitieslimit,
         active: true,
         edit_facility: _edit_facility,
-        expiredAt: _newExpired
+        expiredAt: _newExpired,
+        startAt: _startAt
     }
     const updateUser = async (body: {
         password?: string;
@@ -98,6 +100,7 @@ export const DetailUser = ({ user }: Props) => {
     }
 
     useEffect(() => {
+        set_startAt(user.startAt)
         set_facilityLimit(user.facilitieslimit)
         set_edit_facility(user.editfacilities.map(f => f.facilityId))
         set_edit_facility_name(user.editfacilities.map(f => f.facility.name))
@@ -112,14 +115,15 @@ export const DetailUser = ({ user }: Props) => {
             set_newExpired(user.expiredAt)
         }
         if (_extend === "6mth") {
-            // console.log(moment(user.expiredAt).utc().add(6, 'months').format("YYYY年MM月DD日"))
-            set_newExpired(moment(user.expiredAt).add(6, 'months').toDate())
+            // console.log(_startAt && (moment(user.expiredAt).toDate() <= _startAt))
+            // console.log(moment(user.expiredAt).toDate())
+            set_newExpired(_startAt && (moment(user.expiredAt).toDate() <= moment(_startAt).toDate()) ? moment(_startAt).add(6, 'months').toDate() : moment(user.expiredAt).add(6, 'months').toDate())
         }
         if (_extend === "12mth") {
             // console.log(moment(user.expiredAt).utc().add(1, 'years').format("YYYY年MM月DD日"))
-            set_newExpired(moment(user.expiredAt).add(12, 'months').toDate())
+            set_newExpired(_startAt && (moment(user.expiredAt).toDate() <= moment(_startAt).toDate()) ? moment(_startAt).add(12, 'months').toDate() : moment(user.expiredAt).add(12, 'months').toDate())
         }
-    }, [_extend, user.expiredAt])
+    }, [_extend, _startAt, user.expiredAt])
 
     return (
         slug === "news" ?
@@ -193,8 +197,16 @@ export const DetailUser = ({ user }: Props) => {
                         <div>
                             作成日: {moment(user.createdAt).utc().format("YYYY年MM月DD日")}
                         </div>
+                        <div className='flex'>
+                            <div>
+                                開始日:
+                            </div>
+                            <div>
+                                <Input key={_startAt?.toString()} type='date' onchange={v => set_startAt(moment(v).toDate())} value={moment(_startAt).format("YYYY-MM-DD")} sx='!w-full !m-0' />
+                            </div>
+                        </div>
                         <div>
-                            有効期限: {moment(_newExpired).utc().format("YYYY年MM月DD日")}
+                            有効期限: {moment(_newExpired).toDate() < new Date() ? <span className='text-red-500'>有効期限が切れました。</span> : moment(_newExpired).format("YYYY年MM月DD日")}
                         </div>
                     </> :
                     null}
@@ -215,6 +227,7 @@ type NewsProps = {
         category: {
             name: string
         }
+        draft: boolean
     },
     event: () => void
     archive?: string
@@ -235,8 +248,10 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
     const [_content, set_content] = useState<string>("")
     const [_newContent, set_newContent] = useState<string>("")
     const [_categoryId, set_categoryId] = useState<number>(0)
+    const [_draft, set_draft] = useState<boolean>(false)
 
     useEffect(() => {
+        console.log(item)
         if (item) {
             set_id(item.id)
             set_archive(item.archive)
@@ -244,22 +259,26 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
             set_slug(item.slug)
             set_content(item.content)
             set_categoryId(item.categoryId)
+            set_draft(item.draft)
         } else {
             set_slug("new_" + moment(new Date).format("YYYY_MM_DD_hh_mm_ss"))
         }
-    }, [item])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     const body = {
         name: _name,
+        archive: "news",
         slug: _slug,
         content: _newContent || _content,
         categoryId: _categoryId || 11,
+        draft: _draft,
 
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateItem = async (body: any) => {
-        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id: _id }, body)
+    const updateItem = async (id: number, body: any) => {
+        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive || "news", id }, body)
         if (result.success) {
             store.dispatch(setModal({ open: true, value: "", msg: "更新成功！", type: "notification" }))
             setTimeout(() => {
@@ -310,10 +329,21 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
                 <div className='font-bold text-sm'>ニュースの内容</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} />
             </div>
-
+            <div className='mb-2 flex h-12 gap-2 my-2'>
+                <div className='h-full flex flex-col justify-center'>状態 : </div>
+                <div className='col-span-1 bg-white h-12 border  rounded active:outline-0 border-slate-300 w-20'>
+                    <select onChange={(e) => set_draft(e.target.value === "1" ? true : false)} value={_draft ? 1 : 0} className='pt-2 w-full flex flex-col justify-center h-full'>
+                        {/* <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option> */}
+                        {[{ name: "下書き", value: 1 }, { name: "公開", value: 0 }].map((item, index) =>
+                            <option className='text-black' key={index} value={item.value} >{item.name}</option>
+                        )}
+                    </select>
+                </div>
+            </div>
             <div className="flex gap-1">
-                <Button name="戻る" sx='!bg-white !text-org-button border-2 !m-0' onClick={() => { toPage.back() }} />
-                {item ? <Button name="保存" sx='!bg-org-button !m-0' onClick={() => { updateItem(body) }} /> : <Button name="作成" sx='!bg-org-button !m-0' onClick={() => { createItem(body) }} />}
+                <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={() => { toPage.back() }} />
+                <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; newBody.archive = "news_preview"; await updateItem(1, newBody); window.open(process.env.home_url + "news?archivePlus=news_preview", "_blank") }} />
+                {item ? <Button name="保存" sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> : <Button name="作成" sx='!bg-org-button !m-0' onClick={() => { createItem(body) }} />}
             </div>
 
         </div>
@@ -445,6 +475,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
 
     const body = {
         name: _name,
+        archive: "facility",
         slug: _slug,
         content: _newContent || _content,
         contenttitle: _contenttitle,
@@ -656,7 +687,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; newBody.draft = false; await updateItem(84, newBody); window.open(process.env.home_url + "/facility/_preview?archivePlus=facility_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.archive = "facility_preview"; newBody.slug = "_preview"; newBody.draft = false; await updateItem(84, newBody); window.open(process.env.home_url + "/facility/_preview?archivePlus=facility_preview", "_blank") }} />
 
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
@@ -717,7 +748,6 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
     }, [])
 
     const [_id, set_id] = useState<number>(0)
-    const [_archive, set_archive] = useState<string>("")
     const [_name, set_name] = useState<string>("")
     const [_slug, set_slug] = useState<string>("")
     const [_content, set_content] = useState<string>("")
@@ -725,16 +755,19 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
     const [_contractWarn, set_contractWarn] = useState<string>("")
     const [_contractName, set_contractName] = useState<string>("")
     const [_newContent, set_newContent] = useState<string>("")
-    const [_worktype, set_worktype] = useState<string>("")
+    const [_worktype, set_worktype] = useState<string>("手話通訳業務")
+    const [_worktypeInput, set_worktypeInput] = useState<string>("")
     const [_worktag, set_worktag] = useState<{ id: number, name: string }[]>([])
-    const [_workstatus, set_workstatus] = useState<string>("")
+    const [_workstatus, set_workstatus] = useState<string>("常勤")
+    const [_workstatusInput, set_workstatusInput] = useState<string>("")
     const [_workplaceName, set_workplaceName] = useState<string>("")
     const [_workplaceId, set_workplaceId] = useState<number>(0)
     const [_worktime, set_worktime] = useState<string>("")
     const [_workSalary, set_workSalary] = useState<string>("")
     const [_bonus, set_bonus] = useState<string>("")
     const [_workbenefit, set_workbenefit] = useState<string>("")
-    const [_lisense, set_lisense] = useState<string>("")
+    const [_lisense, set_lisense] = useState<string>("手話通訳士")
+    const [_lisenseInput, set_lisenseInput] = useState<string>("")
     const [_dayoff, set_dayoff] = useState<string>("")
     const [_startDate, set_startDate] = useState<Date>(new Date())
     const [_endDate, set_endDate] = useState<Date>(new Date())
@@ -748,7 +781,6 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
     useEffect(() => {
         if (item) {
             set_id(item.id)
-            set_archive(item.archive)
             set_name(item.title)
             set_slug(item.slug)
             set_worktype(item.worktype)
@@ -777,20 +809,21 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
 
     const body = {
         title: _name,
+        archive: "post",
         slug: _slug,
         content: _newContent || _content,
         contract: _contract,
         contractName: _contractName,
-        worktype: _worktype,
+        worktype: _worktype || _worktypeInput,
         tagIds: _worktag.map(t => t.id),
-        workstatus: _workstatus,
+        workstatus: _workstatus || _workstatusInput,
         worktime: _worktime,
         worksalary: _workSalary,
         bonus: _bonus,
         workbenefit: _workbenefit,
         imageId: _imageId || 4,
         facilityId: _workplaceId,
-        lisense: _lisense,
+        lisense: _lisense || _lisenseInput,
         dayoff: _dayoff,
         startDate: new Date(_startDate),
         endDate: new Date(_endDate),
@@ -799,8 +832,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateItem = async (id: number, body: any) => {
-        console.log(body)
-        const result = await ApiUpdateItem({ position: _currentUser.position, archive: _archive, id }, body)
+        const result = await ApiUpdateItem({ position: _currentUser.position, archive: "post", id }, body)
         if (result.success) {
             store.dispatch(setModal({ open: true, value: "", msg: "更新成功！", type: "notification" }))
             setTimeout(() => {
@@ -970,23 +1002,23 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <div className=''>職種</div>
                 <div className='col-span-1 bg-white h-12 border border-slate-300 rounded text-lg'>
                     <select onChange={(e) => set_worktype(e.target.value)} value={_worktype} className='pt-2 w-full flex flex-col justify-center h-full'>
-                        <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option>
                         {worktypeList.map((item, index) =>
                             <option className='' key={index} value={item.name} >{item.name}</option>
                         )}
+                        <option className='h-12 flex flex-col justify-center' value={""}>{"その他"}</option>
                     </select>
                 </div>
                 <div className='text-sm px-2 opacity-50'>選択肢以外の職種は下記に入力してください</div>
-                <Input onchange={v => { set_worktype(v) }} value={_worktype} sx='!w-full !m-0' />
+                <Input onchange={v => { set_worktypeInput(v) }} value={_worktypeInput} sx='!w-full !m-0' disable={worktypeList.map(wstt => wstt.name).includes(_worktype)} />
                 <div className="h-2"></div>
             </div>
             <div className='mb-2'>
                 <div className=''>タグ</div>
                 <div className='flex gap-2 mb-2 flex-wrap'>
                     {_tag.map((tag, index) =>
-                        <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer ${_worktag.map(t => t.id).includes(tag.id) ? "bg-org-button/25" : "bg-org-button/5"}`} key={index} onClick={() => set_worktag(crr => crr.map(t => t.id).includes(tag.id) ? crr.filter(cr => cr.id !== tag.id) : [...crr, tag])}>{tag.name}</div>
+                        <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer ${_worktag.map(t => t.id).includes(tag.id) ? "bg-org-button/15" : "bg-org-button/5"}`} key={index} onClick={() => set_worktag(crr => crr.map(t => t.id).includes(tag.id) ? crr.filter(cr => cr.id !== tag.id) : [...crr, tag])}>{tag.name}</div>
                     )}
-                    <div className={`border rounded-3xl text-sm px-2 py-1 border-slate-300 cursor-pointer bg-org-button/5 font-bold`} onClick={() => set_openTagModal(true)}>+</div>
+                    <div className={`shadow-md border rounded-md text-sm px-2 py-1 border-slate-300 cursor-pointer text-white bg-org-button `} onClick={() => set_openTagModal(true)}>追加</div>
                 </div>
                 <Input onchange={v => set_worktag(v)} value={_worktag.map(t => t.name).toString()} sx='!w-full !m-0' disable />
             </div>
@@ -994,14 +1026,14 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <div className=''>雇用形態</div>
                 <div className='col-span-1 bg-white h-12 border border-slate-300 rounded text-lg'>
                     <select onChange={(e) => set_workstatus(e.target.value)} value={_workstatus} className='pt-2 w-full flex flex-col justify-center h-full'>
-                        <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option>
                         {workstatusList.map((item, index) =>
                             <option className='' key={index} value={item.name} >{item.name}</option>
                         )}
+                        <option className='h-12 flex flex-col justify-center' value={""}>{"その他"}</option>
                     </select>
                 </div>
                 <div className='text-sm px-2 opacity-50'>選択肢以外の雇用形態は下記に入力してください</div>
-                <Input onchange={v => set_workstatus(v)} value={_workstatus} sx='!w-full !m-0' />
+                <Input onchange={v => { set_workstatusInput(v) }} value={_workstatusInput} sx='!w-full !m-0' disable={workstatusList.map(wstt => wstt.name).includes(_workstatus)} />
                 <div className="h-2"></div>
 
             </div>
@@ -1009,14 +1041,15 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <div className=''>資格の有無</div>
                 <div className='col-span-1 bg-white h-12 border border-slate-300 rounded text-lg'>
                     <select onChange={(e) => set_lisense(e.target.value)} value={_lisense} className='pt-2 w-full flex flex-col justify-center h-full'>
-                        <option className='h-12 flex flex-col justify-center' value={""}>{"---"}</option>
                         {licenseList.map((item, index) =>
                             <option className='' key={index} value={item.name} >{item.name}</option>
                         )}
+                        <option className='h-12 flex flex-col justify-center' value={""}>{"その他"}</option>
+
                     </select>
                 </div>
                 <div className='text-sm px-2 opacity-50'>選択肢以外の資格は下記に入力してください</div>
-                <Input onchange={v => set_lisense(v)} value={_lisense} sx='!w-full !m-0' />
+                <Input onchange={v => set_lisenseInput(v)} value={_lisenseInput} sx='!w-full !m-0' disable={licenseList.map(wstt => wstt.name).includes(_lisense)} />
                 <div className="h-2"></div>
             </div>
             <div className='mb-2'>
@@ -1035,10 +1068,10 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <div className=''>福利厚生（自由にご記入ください）</div>
                 <textarea onChange={e => set_workbenefit(e.currentTarget.value)} value={_workbenefit} className='!w-full !m-0 border border-slate-300 rounded h-36 bg-white p-2' />
             </div>
-            <div className='mb-2'>
-                <div className=''>掲載日</div>
+            {_currentUser.position !== "user" ? <div className='mb-2'>
+                <div className=''>開始日</div>
                 <Input key={moment(_startDate).format("YYYY-MM-DD")} type='date' onchange={v => set_startDate(v)} value={moment(_startDate).format("YYYY-MM-DD")} sx='!w-full !m-0' />
-            </div>
+            </div> : null}
             <div className='mb-2'>
                 <div className=''>求人の内容</div>
                 <TextArea onchange={(value: React.SetStateAction<string>) => set_newContent(value)} value={_content} tool={true} />
@@ -1056,7 +1089,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; newBody.draft = false; await updateItem(7, newBody); window.open(process.env.home_url + "/post/_preview?archivePlus=post_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.archive = "post_preview"; newBody.slug = "_preview"; newBody.draft = false; await updateItem(7, newBody); window.open(process.env.home_url + "/post/_preview?archivePlus=post_preview", "_blank") }} />
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
                         <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
@@ -1139,6 +1172,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
 
     const body = {
         name: _name,
+        archive: "interview",
         slug: _slug,
         content: _newContent || _content,
         worktype: _worktype,
@@ -1276,7 +1310,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 </div>
                 <div className="flex gap-1">
                     <Button name="戻る" sx='!bg-white !text-org-button border-1 !m-0 !w-20' onClick={() => { toPage.back() }} />
-                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.slug = "_preview"; await updateItem(3, newBody); window.open(process.env.home_url + "/interview/_preview?archivePlus=interview_preview", "_blank") }} />
+                    <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.archive = "interview_preview"; newBody.slug = "_preview"; await updateItem(3, newBody); window.open(process.env.home_url + "/interview/_preview?archivePlus=interview_preview", "_blank") }} />
 
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :

@@ -21,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="jp">
       <body className={`${geistSans.className} bg-org-bg none-scr`}>
         <Provider>
           <Modal />

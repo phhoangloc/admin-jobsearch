@@ -10,6 +10,7 @@ export type UserType = {
     active: boolean,
     facilitieslimit: number,
     createdAt: Date,
+    startAt: Date,
     expiredAt: Date
     editfacilities: {
         facilityId: number,
