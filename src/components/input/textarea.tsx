@@ -161,8 +161,10 @@ const TextArea = ({ value, onchange, tool }: Props) => {
     };
 
     const [_isAddLink, set_IsAddLink] = useState<boolean>(false)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_url, set_url] = useState<string>("")
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const addLink = (url: string) => {
         const selection = _editorState.getSelection();
         if (!selection.isCollapsed()) {
@@ -195,14 +197,14 @@ const TextArea = ({ value, onchange, tool }: Props) => {
             {tool ?
                 <div className='h-12 sticky top-0 py-1 flex gap-1 bg-org-bg'>
                     <UploadButton onClick={(e) => getFile(e)} name={<div className='border rounded-3xl py-1 px-4 bg-white cursor-pointer'><UploadIcon /> ファイルをアップロード</div>} />
-                    {_isAddLink ?
+                    {/* {_isAddLink ?
                         <div className='flex gap-2'>
-                            <input className='border w-60 border-slate-300 bg-white rounded' onChange={(e) => set_url(e.currentTarget.value)} value={_url}></input>
+                            <input className='border w-60 border-slate-300 bg-white rounded' placeholder='https://www.google.com.jp' onChange={(e) => set_url(e.currentTarget.value)} value={_url}></input>
                             <div className='w-20 text-center text-sm flex flex-col justify-center rounded-3xl  border text-org-button' onClick={() => { set_IsAddLink(false); toggleHighlight() }}>キャンセル</div>
                             <div className='w-20 text-center text-sm flex flex-col justify-center rounded-3xl  bg-org-button text-white' onClick={() => addLink(_url)}>追加</div>
                         </div> :
                         <div className='border rounded-3xl py-1 px-4 bg-white cursor-pointer' onClick={() => { set_IsAddLink(true); toggleHighlight() }}> リンクを設定</div>
-                    }
+                    } */}
                 </div> :
                 null}
 

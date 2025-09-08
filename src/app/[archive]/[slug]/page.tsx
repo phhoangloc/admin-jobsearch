@@ -29,8 +29,8 @@ const Page = () => {
     useEffect(() => {
         const getItem = async (position: string, archive: string, slug: string, hostId: string) => {
             if (archive === "user") {
-                if (_currentUser.position === "user") {
-                    const result = await ApiItemUser({ position, archive, id: Number(slug) })
+                if (_currentUser.position === "user" || _currentUser.position === "poster") {
+                    const result = await ApiItemUser({ position: "user", archive, id: Number(slug) })
                     if (result.success) {
                         set_item(result.data)
                     } else {
@@ -58,8 +58,6 @@ const Page = () => {
             getItem(_currentUser.position, archive, slug, _currentUser.id.toString())
         }
     }, [_currentUser, _currentUser.position, archive, slug, _refresh])
-
-
 
     return (
         <div className='p-2'>

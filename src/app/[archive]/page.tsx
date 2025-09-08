@@ -29,8 +29,8 @@ const Page = () => {
     useEffect(() => {
 
 
-        const getItems = async (position: string, archive: string, page: number, limit: number) => {
-            const result = await ApiItemUser({ position, archive, skip: page * limit, limit })
+        const getItems = async (position: string, archive: string, hostId: number, page: number, limit: number) => {
+            const result = await ApiItemUser({ position, archive, skip: page * limit, limit, hostId: position === "admin" ? "" : hostId.toString() })
             if (result.success) {
                 set_items(result.data)
             } else {
@@ -39,7 +39,7 @@ const Page = () => {
         }
 
         if (_currentUser && _currentUser.id) {
-            getItems(_currentUser.position, archive, _page, 20)
+            getItems(_currentUser.position, archive, _currentUser.id, _page, 20)
         }
     }, [_currentUser, _currentUser.position, archive, _page, _refresh])
 
@@ -50,14 +50,14 @@ const Page = () => {
     const [_allItemCount, set_allItemCount] = useState<number>(0)
 
     useEffect(() => {
-        const getAllItems = async (position: string, archive: string,) => {
-            const result = await ApiItemUser({ position, archive, })
+        const getAllItems = async (position: string, archive: string, hostId: number) => {
+            const result = await ApiItemUser({ position, archive, hostId: position === "admin" ? "" : hostId.toString() })
             if (result.success) {
                 set_allItemCount(result.data.length)
             }
         }
         if (archive) {
-            getAllItems(_currentUser.position, archive)
+            getAllItems(_currentUser.position, archive, _currentUser.id)
         }
     }, [_currentUser.id, _currentUser.position, archive, _refresh])
 

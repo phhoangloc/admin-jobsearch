@@ -41,7 +41,7 @@ const Sidebar = () => {
             name: "新規ニュース",
             link: "/news/news"
         }],
-        limit: "user"
+        limit: "user,poster"
     },
     {
         icon: <ArticleIcon className='h-7 w-7 my-auto text-org-button' />,
@@ -60,8 +60,9 @@ const Sidebar = () => {
         items: [{
             name: "新規施設登録",
             link: "/facility/news",
-            limit: "user"
+            limit: "user,poster"
         }],
+        limit: "poster"
     },
     {
         icon: <InterpreterModeIcon className='h-7 w-7 my-auto text-org-button' />,
@@ -71,7 +72,7 @@ const Sidebar = () => {
             name: "新規インタビュー",
             link: "/interview/news"
         }],
-        limit: "user"
+        limit: "user,poster"
     },
     {
         icon: <PersonIcon className='h-7 w-7 my-auto text-org-button' />,
@@ -101,7 +102,7 @@ const Sidebar = () => {
             <div className=''>
                 {
                     menu.map((m, index) =>
-                        m.limit === _currentUser.position ? null :
+                        m.limit && m.limit.includes(_currentUser.position) ? null :
                             <div key={index}>
                                 <div className='flex gap-2 h-8 cursor-pointer hover:opacity-75' onClick={() => { toPage.push(m.link); set_index(index) }}>
                                     {m.icon}

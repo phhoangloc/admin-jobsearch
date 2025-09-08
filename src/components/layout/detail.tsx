@@ -23,7 +23,6 @@ type Props = {
     user: UserType,
 }
 export const DetailUser = ({ user }: Props) => {
-
     const [_currentUser, set_currentUser] = useState<UserType>(store.getState().user)
 
     const update = () => {
@@ -37,6 +36,7 @@ export const DetailUser = ({ user }: Props) => {
     const [_username, set_username] = useState<string>("")
     const [_email, set_email] = useState<string>("")
     const [_password, set_password] = useState<string>("")
+    const [_position, set_position] = useState<string>("")
     const [_facilityLimit, set_facilityLimit] = useState<number>(0)
     const [_edit_facility, set_edit_facility] = useState<number[]>([])
     const [_edit_facility_name, set_edit_facility_name] = useState<string[]>([])
@@ -49,6 +49,7 @@ export const DetailUser = ({ user }: Props) => {
         password: _password || undefined,
         facilitieslimit: Number(_facilityLimit) || user.facilitieslimit,
         active: true,
+        position: _position,
         edit_facility: _edit_facility,
         expiredAt: _newExpired,
         startAt: _startAt
@@ -100,6 +101,7 @@ export const DetailUser = ({ user }: Props) => {
     }
 
     useEffect(() => {
+        set_position(user.position)
         set_startAt(user.startAt)
         set_facilityLimit(user.facilitieslimit)
         set_edit_facility(user.editfacilities.map(f => f.facilityId))
@@ -115,12 +117,10 @@ export const DetailUser = ({ user }: Props) => {
             set_newExpired(user.expiredAt)
         }
         if (_extend === "6mth") {
-            // console.log(_startAt && (moment(user.expiredAt).toDate() <= _startAt))
-            // console.log(moment(user.expiredAt).toDate())
+
             set_newExpired(_startAt && (moment(user.expiredAt).toDate() <= moment(_startAt).toDate()) ? moment(_startAt).add(6, 'months').toDate() : moment(user.expiredAt).add(6, 'months').toDate())
         }
         if (_extend === "12mth") {
-            // console.log(moment(user.expiredAt).utc().add(1, 'years').format("YYYY年MM月DD日"))
             set_newExpired(_startAt && (moment(user.expiredAt).toDate() <= moment(_startAt).toDate()) ? moment(_startAt).add(12, 'months').toDate() : moment(user.expiredAt).add(12, 'months').toDate())
         }
     }, [_extend, _startAt, user.expiredAt])
@@ -163,7 +163,7 @@ export const DetailUser = ({ user }: Props) => {
                     <Input type='password' onchange={v => set_password(v)} value={_password} sx='!w-72 !m-0' />
                 </div>
                 <div>
-                    {_currentUser.position === "admin" ?
+                    {_currentUser.position === "admin" && _position !== "poster" ?
                         <div className='mt-12 border rounded-md border-slate-300 bg-white'>
                             <div className='flex h-12 justify-between bg-org-button/10 px-2'>
                                 <div className='h-full flex flex-col justify-center font-bold text-xl  '>施設</div>
@@ -178,11 +178,21 @@ export const DetailUser = ({ user }: Props) => {
 
                 </div>
                 <div className="h-12"></div>
-                <div>
-                    有効期限を延長:
-                </div>
-                {_currentUser.position !== "user" ?
+
+
+                {_currentUser.position === "admin" ?
                     <>
+                        <div>
+                            権限グループ:
+                        </div>
+                        <select className='bg-white h-12 border rounded' value={_position} onChange={(e) => { set_position(e.target.value) }}>
+                            <option value="admin">管理者</option>
+                            <option value="user">ユーザー</option>
+                            <option value="poster">求人情報のみ投稿者</option>
+                        </select>
+                        <div>
+                            有効期限を延長:
+                        </div>
                         <div className="flex gap-4">
                             <div >
                                 < input type='radio' className='mr-1' value={"0mth"} checked={_extend === "0mth"} onChange={(e) => set_extend(e.target.value)} ></input>延長なし
@@ -202,7 +212,7 @@ export const DetailUser = ({ user }: Props) => {
                                 開始日:
                             </div>
                             <div>
-                                <Input key={_startAt?.toString()} type='date' onchange={v => set_startAt(moment(v).toDate())} value={moment(_startAt).format("YYYY-MM-DD")} sx='!w-full !m-0' />
+                                <Input key={_startAt?.toString()} type='date' onchange={v => set_startAt(new Date(v))} value={moment(_startAt).format("YYYY-MM-DD")} sx='!w-full !m-0' />
                             </div>
                         </div>
                         <div>
@@ -251,7 +261,6 @@ export const DetailNews = ({ item, event, archive }: NewsProps) => {
     const [_draft, set_draft] = useState<boolean>(false)
 
     useEffect(() => {
-        console.log(item)
         if (item) {
             set_id(item.id)
             set_archive(item.archive)
@@ -364,6 +373,7 @@ type FacilityProps = {
             name: string
         },
         address: string,
+        addressno: string,
         location: string,
         area: string,
         phone: string,
@@ -399,6 +409,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
     const [_postnoWarn, set_postnoWarn] = useState<string>("")
     const [_postnoKey, set_postnoKey] = useState<number>(0)
     const [_address, set_address] = useState<string>("")
+    const [_addressno, set_addressno] = useState<string>("")
     const [_location, set_location] = useState<string>("")
     const [_area, set_area] = useState<string>("")
     const [_phone, set_phone] = useState<string>("")
@@ -414,6 +425,8 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
 
+    const [_reset_upload_button, set_reset_upload_button] = useState<number>(0)
+
     useEffect(() => {
         if (item) {
             set_id(item.id)
@@ -427,6 +440,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
             set_imageId(item.imageId)
             set_imagePreview(process.env.ftp_url + item.image.name)
             set_address(item.address)
+            set_addressno(item.addressno || "")
             set_location(item.location)
             set_area(item.area)
             set_phone(item.phone)
@@ -454,6 +468,8 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                     store.dispatch(setModal({ open: true, value: "", msg: "アップロード成功！", type: "notification" }))
                     setTimeout(() => {
                         store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                        set_reset_upload_button(n => n + 1)
+
                     }, 3000);
                     set_imageId(result.data.id)
                     set_imagePreview(process.env.ftp_url + result.data.name)
@@ -465,6 +481,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
 
                     setTimeout(() => {
                         store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                        set_reset_upload_button(n => n + 1)
                     }, 3000);
 
                 }
@@ -482,6 +499,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
         worktype: _worktype,
         postno: _postno,
         address: _address,
+        addressno: _addressno,
         location: _location,
         imageId: _imageId || 4,
         area: _area,
@@ -602,7 +620,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
             <div className='mb-2'>
                 <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
                 <div className='w-max flex justify-between'>
-                    <UploadButton name={<div className='border rounded-3xl py-1 px-4 bg-white'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
+                    <UploadButton key={_reset_upload_button} name={<div className='border rounded-3xl py-1 px-4 bg-white'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>
                 {
                     _imagePreview ?
@@ -633,6 +651,10 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
             <div className='mb-2'>
                 <div className=''>住所 <span className='text-sm text-red-500'>必須</span></div>
                 <Input onchange={v => set_address(v)} value={_address} sx='!w-full !m-0' />
+            </div>
+            <div className='mb-2'>
+                <div className=''>番地</div>
+                <Input onchange={v => set_addressno(v)} value={_addressno} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
                 <div className=''>電話番号 <span className='text-sm text-red-500'>必須</span></div>
@@ -728,11 +750,20 @@ type PostProps = {
         },
         workplaceId: number,
         workplace: {
-            name: string
+            name: string,
+            location: string,
+            postno: string,
+            address: string,
+            addressno: string,
         },
         startDate: Date,
         endDate: Date
         draft: boolean,
+        location: string,
+        postno: string,
+        address: string,
+        addressno: string,
+
     },
     event: () => void
     archive?: string
@@ -773,11 +804,18 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
     const [_endDate, set_endDate] = useState<Date>(new Date())
     const [_draft, set_draft] = useState<boolean>(false)
 
+    const [_postno, set_postno] = useState<string>("")
+    const [_postnoWarn, set_postnoWarn] = useState<string>("")
+    const [_postnoKey, set_postnoKey] = useState<number>(0)
+    const [_address, set_address] = useState<string>("")
+    const [_addressno, set_addressno] = useState<string>("")
+    const [_location, set_location] = useState<string>("")
+
     const [_modalFacility, set_modalFacility] = useState<boolean>(false)
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
 
-
+    const [_reset_upload_button, set_reset_upload_button] = useState<number>(0)
     useEffect(() => {
         if (item) {
             set_id(item.id)
@@ -792,7 +830,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             set_imageId(item.imageId)
             set_imagePreview(process.env.ftp_url + item.image.name)
             set_workplaceId(item.workplaceId)
-            set_workplaceName(item.workplace.name)
+            set_workplaceName(item.workplace?.name || "")
             set_worktime(item.worktime)
             set_workSalary(item.worksalary)
             set_bonus(item.bonus)
@@ -802,6 +840,10 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             set_startDate(item.startDate)
             set_endDate(item.endDate)
             set_draft(item.draft)
+            set_location(item.workplace?.location || item.location)
+            set_postno(item.workplace?.postno || item.postno)
+            set_address(item.workplace?.address || item.address)
+            set_addressno(item.workplace?.addressno || item.addressno || "")
         } else {
             set_slug("post_" + moment(new Date).format("YYYY_MM_DD_hh_mm_ss"))
         }
@@ -822,12 +864,17 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
         bonus: _bonus,
         workbenefit: _workbenefit,
         imageId: _imageId || 4,
-        facilityId: _workplaceId,
+        facilityId: _workplaceId || undefined,
         lisense: _lisense || _lisenseInput,
         dayoff: _dayoff,
         startDate: new Date(_startDate),
         endDate: new Date(_endDate),
-        draft: _draft
+        draft: _draft,
+        location: _location,
+        postno: _postno,
+        address: _address,
+        addressno: _addressno,
+
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -896,6 +943,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                     store.dispatch(setModal({ open: true, value: "", msg: "削除成功！", type: "notification" }))
                     setTimeout(() => {
                         store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                        set_reset_upload_button(n => n + 1)
                     }, 3000);
                     set_imageId(result.data.id)
                     set_imagePreview(process.env.ftp_url + result.data.name)
@@ -903,11 +951,11 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                         event()
                     }
                 } else {
-                    console.log(result.data)
-                    store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
+                    store.dispatch(setModal({ open: true, value: "", msg: result.data, type: "notification" }))
 
                     setTimeout(() => {
                         store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                        set_reset_upload_button(n => n + 1)
                     }, 3000);
 
                 }
@@ -952,6 +1000,35 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
         }
     }
 
+    const formatPostNo = (input: string) => {
+        const digits = input.replace(/\D/g, '');
+        if (digits.length === 7) {
+            set_postnoWarn("")
+            set_postnoKey(k => k + 1)
+            return digits.replace(/(\d{3})(\d{4})/, '$1-$2');
+        } else {
+            set_postnoWarn("入力した郵便番号は適切ではありません")
+            return input;
+        }
+
+    }
+    const getAddressFacility = async (pNo: string) => {
+        const result = await getAddress(pNo)
+        if (result.results?.length) {
+            set_address(result.results[0].address1 + result.results[0].address2 + result.results[0].address3)
+            set_location(result.results[0].address1)
+        }
+    }
+    useEffect(() => {
+        if (!_postno) { return }
+        const digits = _postno.replace(/\D/g, '');
+        if (digits.length === 7) {
+            getAddressFacility(digits)
+        }
+        set_postno(formatPostNo(digits))
+    }, [_postno])
+
+
     return (
         <div className='relative'>
             <div className={`${_openTagModal ? "fixed" : "hidden"} top-0 left-0 w-full h-full backdrop-brightness-90 backdrop-blur-sm z-1 flex flex-col justify-center'`}>
@@ -970,7 +1047,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
             <div className='mb-2'>
                 <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
                 <div className='w-max flex justify-between mb-2'>
-                    <UploadButton name={<div className='border rounded-3xl py-1 px-4 bg-white cursor-pointer'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
+                    <UploadButton key={_reset_upload_button} name={<div className='border rounded-3xl py-1 px-4 bg-white cursor-pointer'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>
                 {
                     _imagePreview ?
@@ -984,20 +1061,49 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                         : null
                 }
             </div>
+            {
+                _currentUser.position === "user" || _currentUser.position === "admin" ?
+                    <>
+                        <div className='mb-2'>
+                            <div className=''>事業所 <span className='text-red-500 text-sm'>必須</span></div>
+                            <div className='border rounded-md  px-4 bg-white w-max mb-2 h-12 flex flex-col justify-center cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)}> 施設を選択</div>
+                            <Input onchange={v => console.log(v)} value={_workplaceName} sx='!w-full !m-0' disable />
+                        </div>
+                    </> :
+                    null}
+            {
+                _currentUser.position === "poster" || _currentUser.position === "admin" ?
+                    <>
+                        <div className='mb-2'>
+                            <div className=''>郵便番号 <span className='text-sm text-red-500'>必須</span></div>
+                            <Input key={_postnoKey} onchange={v => { set_postno(v) }} value={_postno} sx='!w-full !m-0' />
+                            <p className='text-red-500 text-xs'>{_postnoWarn}</p>
+                        </div>
+                        <div className='mb-2'>
+                            <div className=''>都道府県（自動で入力されます）</div>
+                            <Input onchange={v => set_location(v)} value={_location} sx='!w-full !m-0' />
+                        </div>
+                        <div className='mb-2'>
+                            <div className=''>住所 <span className='text-sm text-red-500'>必須</span></div>
+                            <Input onchange={v => set_address(v)} value={_address} sx='!w-full !m-0' />
+                        </div>
+                        <div className='mb-2'>
+                            <div className=''>番地 </div>
+                            <Input onchange={v => set_addressno(v)} value={_addressno} sx='!w-full !m-0' />
+                        </div>
+                    </> : null
+            }
+
             <div className='mb-2'>
-                <div className=''>事業所 <span className='text-red-500 text-sm'>必須</span></div>
-                <div className='border rounded-md  px-4 bg-white w-max mb-2 h-12 flex flex-col justify-center cursor-pointer' onClick={() => set_modalFacility(!_modalFacility)}> 施設を選択</div>
-                <Input onchange={v => console.log(v)} value={_workplaceName} sx='!w-full !m-0' disable />
-            </div>
-            <div className='mb-2'>
-                <div className=''>担当者名</div>
+                <div className=''>担当者名<span className='text-red-500 text-sm'>必須</span></div>
                 <Input onchange={v => set_contractName(v)} value={_contractName} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>担当者連絡先（メールアドレス）</div>
+                <div className=''>担当者連絡先（メールアドレス）<span className='text-red-500 text-sm'>必須</span></div>
                 <Input onchange={v => set_contract(v)} value={_contract} sx='!w-full !m-0' />
                 <p className='text-red-500 text-xs'>{_contractWarn}</p>
             </div>
+
             <div className='mb-2'>
                 <div className=''>職種</div>
                 <div className='col-span-1 bg-white h-12 border border-slate-300 rounded text-lg'>
@@ -1092,7 +1198,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                     <Button name="プレビュー" sx='!bg-white !text-org-button border-1 !m-0 !w-24 text-sm' onClick={async () => { const newBody = { ...body }; newBody.archive = "post_preview"; newBody.slug = "_preview"; newBody.draft = false; await updateItem(7, newBody); window.open(process.env.home_url + "/post/_preview?archivePlus=post_preview", "_blank") }} />
                     {item ?
                         <Button name={"保存"} sx='!bg-org-button !m-0' onClick={() => { updateItem(_id, body) }} /> :
-                        <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || !_workplaceId} onClick={() => { createItem(body) }} />}
+                        <Button name="作成" sx='!bg-org-button !m-0' disable={!_name || (!_workplaceId && !_postno) || !_contract || !_contractName} onClick={() => { createItem(body) }} />}
                 </div>
             </div>
         </div>
