@@ -424,6 +424,7 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
 
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
+    const [_imageWarn, set_imageWarn] = useState<string>("")
 
     const [_reset_upload_button, set_reset_upload_button] = useState<number>(0)
 
@@ -477,10 +478,9 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                         event()
                     }
                 } else {
-                    store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
-
+                    set_imageWarn(result.data)
                     setTimeout(() => {
-                        store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                        set_imageWarn("")
                         set_reset_upload_button(n => n + 1)
                     }, 3000);
 
@@ -618,7 +618,9 @@ export const DetailFacility = ({ item, event, archive }: FacilityProps) => {
                 <Input onchange={v => set_contenttitle(v)} value={_contenttitle} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（PNG、JPG、GIF ファイルを選択してください。最大アップロードサイズ 2 MB。）</span></div>
+                <div className=''><span className='text-sm italic text-red-500'>{_imageWarn}</span></div>
+
                 <div className='w-max flex justify-between'>
                     <UploadButton key={_reset_upload_button} name={<div className='border rounded-3xl py-1 px-4 bg-white'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>
@@ -814,6 +816,7 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
     const [_modalFacility, set_modalFacility] = useState<boolean>(false)
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
+    const [_imageWarn, set_imageWarn] = useState<string>("")
 
     const [_reset_upload_button, set_reset_upload_button] = useState<number>(0)
     useEffect(() => {
@@ -951,12 +954,12 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                         event()
                     }
                 } else {
-                    store.dispatch(setModal({ open: true, value: "", msg: result.data, type: "notification" }))
+                    set_imageWarn(result.data)
 
                     setTimeout(() => {
-                        store.dispatch(setModal({ open: false, value: "", msg: "", type: "" }))
+                        set_imageWarn("")
                         set_reset_upload_button(n => n + 1)
-                    }, 3000);
+                    }, 5000);
 
                 }
             }
@@ -1045,7 +1048,8 @@ export const DetailPost = ({ item, event, archive }: PostProps) => {
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（PNG、JPG、GIF ファイルを選択してください。最大アップロードサイズ 2 MB。）</span></div>
+                <div className=''><span className='text-sm italic text-red-500'>{_imageWarn}</span></div>
                 <div className='w-max flex justify-between mb-2'>
                     <UploadButton key={_reset_upload_button} name={<div className='border rounded-3xl py-1 px-4 bg-white cursor-pointer'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>
@@ -1254,6 +1258,7 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
     const [_modalFacility, set_modalFacility] = useState<boolean>(false)
     const [_imagePreview, set_imagePreview] = useState<string>("")
     const [_imageId, set_imageId] = useState<number>(0)
+    const [_imageWarn, set_imageWarn] = useState<string>("")
 
     useEffect(() => {
         if (item) {
@@ -1301,7 +1306,6 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 event()
             }
         } else {
-            console.log(result.data)
             store.dispatch(setModal({ open: true, value: "", msg: "エラー", type: "notification" }))
 
             setTimeout(() => {
@@ -1346,6 +1350,11 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                     if (event) {
                         event()
                     }
+                } else {
+                    set_imageWarn(result.data)
+                    setTimeout(() => {
+                        set_imageWarn("")
+                    }, 5000);
                 }
             }
         }
@@ -1360,7 +1369,8 @@ export const DetailInterview = ({ item, event, archive }: InterviewProps) => {
                 <Input onchange={v => set_name(v)} value={_name} sx='!w-full !m-0' />
             </div>
             <div className='mb-2'>
-                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（最大アップロードサイズ 2 MB）</span></div>
+                <div className=''>アイキャッチ画像<span className='text-sm opacity-50 italic'>（PNG、JPG、GIF ファイルを選択してください。最大アップロードサイズ 2 MB。）</span></div>
+                <div className=''><span className='text-sm italic text-red-500'>{_imageWarn}</span></div>
                 <div className='w-max flex justify-between'>
                     <UploadButton name={<div className='border rounded-3xl py-1 px-4 bg-white'><UploadIcon /> ファイルをアップロード</div>} onClick={(e) => getFile(e)} />
                 </div>

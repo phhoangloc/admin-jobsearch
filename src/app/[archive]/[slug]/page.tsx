@@ -44,12 +44,22 @@ const Page = () => {
 
                 }
             } else {
-                const result = await ApiItemUser({ position, archive, hostId, slug })
-                if (result.success) {
-                    set_item(result.data[0])
-                }
-                else {
-                    set_warn(result.msg)
+                if (position === "admin") {
+                    const result = await ApiItemUser({ position, archive, slug })
+                    if (result.success) {
+                        set_item(result.data[0])
+                    }
+                    else {
+                        set_warn(result.msg)
+                    }
+                } else {
+                    const result = await ApiItemUser({ position, archive, hostId, slug })
+                    if (result.success) {
+                        set_item(result.data[0])
+                    }
+                    else {
+                        set_warn(result.msg)
+                    }
                 }
             }
 

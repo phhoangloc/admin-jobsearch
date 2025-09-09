@@ -73,7 +73,7 @@ const Page = () => {
                     : null
             }
             {
-                archive !== "category" && archive !== "file" ?
+                archive !== "category" && archive !== "file" && !_warn ?
                     <Archive items={_view_items} event={() => { set_view_items([]); set_refresh(n => n + 1) }} archive={archive} allItemCount={_allItemCount} />
                     : null
             }
